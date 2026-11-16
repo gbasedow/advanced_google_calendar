@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 – 2026-11-16
+
+- Kalender dieser Integration werden nur noch mit ihrem Kalendernamen angezeigt
+  (z. B. „Privat“ statt „user@gmail.com Privat“), u. a. in der Kalenderansicht.
+- Neu eingerichtete Kalender erhalten die Entitäts-ID `calendar.<kalendername>`.
+  Bestehende Entitäts-IDs bleiben unverändert, Automationen müssen nicht
+  angepasst werden. Selbst vergebene Namen bleiben erhalten.
+
 ## 0.3.0 – 2026-11-16
 
 - Maske der Aktion `sync_calendar` überarbeitet:

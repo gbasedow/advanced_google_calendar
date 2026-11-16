@@ -24,8 +24,8 @@ from homeassistant.util import dt as dt_util
 
 from .conftest import ACCOUNT, FakeGoogleApi
 
-TARGET = "calendar.user_example_com_privat"
-READ_ONLY = "calendar.user_example_com_feiertage"
+TARGET = "calendar.privat"
+READ_ONLY = "calendar.feiertage"
 SOURCE = "calendar.quelle"
 HOLIDAYS_ID = "holidays@group.v.calendar.google.com"
 

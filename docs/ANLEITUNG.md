@@ -154,8 +154,8 @@ Vorab:
    - Alle Kalender des Kontos werden als Checkboxen angezeigt (eigene, geteilte, abonnierte, ausgeblendete). Kalender mit 🔒 sind **nur lesbar** und können in HA nicht bearbeitet werden.
    - Der Hauptkalender ist vorausgewählt. Hake alle Kalender an, die synchronisiert werden sollen (mindestens einen).
    - **Abfrageintervall**: wie oft Änderungen aus Google abgeholt werden (1–60 Minuten, Standard 5).
-5. **Absenden**. Das Konto erscheint als Eintrag mit der E-Mail-Adresse als Titel und als Gerät, jeder gewählte Kalender als Entität:
-   `calendar.<e-mail>_<kalendername>`, z. B. `calendar.ich_gmail_com_privat`.
+5. **Absenden**. Das Konto erscheint als Eintrag mit der E-Mail-Adresse als Titel und als Gerät, jeder gewählte Kalender als Entität `calendar.<kalendername>`, z. B. `calendar.privat`.
+   In der Kalenderansicht und überall sonst heißt der Kalender so wie in Google, ohne die E-Mail-Adresse davor. Der Hauptkalender heißt bei Google standardmäßig wie die E-Mail-Adresse. Haben zwei Konten einen gleichnamigen Kalender, hängt HA an die Entitäts-ID `_2` an. Den angezeigten Namen kannst du in den Entitätseinstellungen jederzeit ändern.
 
 ## 6. Weitere Konten, Kalender an-/abwählen, Intervall
 
@@ -191,7 +191,7 @@ In der Seitenleiste unter **Kalender** (oder mit der Kalender-Karte) siehst du a
 ```yaml
 action: calendar.create_event
 target:
-  entity_id: calendar.ich_gmail_com_privat
+  entity_id: calendar.privat
 data:
   summary: "MTB-Runde"
   description: "Treffpunkt Parkplatz"
@@ -209,7 +209,7 @@ Die HA-Standardaktion `calendar.get_events` liefert keine IDs. Zum Ändern oder 
 ```yaml
 action: advanced_google_calendar.list_events
 target:
-  entity_id: calendar.ich_gmail_com_privat
+  entity_id: calendar.privat
 data:
   duration:
     days: 7
@@ -219,7 +219,7 @@ response_variable: termine
 Ergebnis (gekürzt):
 
 ```yaml
-calendar.ich_gmail_com_privat:
+calendar.privat:
   events:
     - uid: "5g1h2..."               # ID des Termins bzw. der Serie
       recurrence_id: "5g1h2..._20261124T170000Z"   # nur bei Serienterminen
@@ -238,20 +238,20 @@ Beispiel: Beim nächsten Termin „Training“ den Ort ändern (nur dieses Vorko
 sequence:
   - action: advanced_google_calendar.list_events
     target:
-      entity_id: calendar.ich_gmail_com_privat
+      entity_id: calendar.privat
     data:
       duration:
         days: 14
     response_variable: termine
   - variables:
       treffer: >-
-        {{ termine['calendar.ich_gmail_com_privat'].events
+        {{ termine['calendar.privat'].events
            | selectattr('summary', 'eq', 'Training') | list }}
   - condition: template
     value_template: "{{ treffer | count > 0 }}"
   - action: advanced_google_calendar.update_event
     target:
-      entity_id: calendar.ich_gmail_com_privat
+      entity_id: calendar.privat
     data:
       uid: "{{ treffer[0].uid }}"
       recurrence_id: "{{ treffer[0].recurrence_id or '' }}"
@@ -273,7 +273,7 @@ Mögliche Felder: `summary`, `description`, `location`, `start_date_time` + `end
 ```yaml
 action: advanced_google_calendar.delete_event
 target:
-  entity_id: calendar.ich_gmail_com_privat
+  entity_id: calendar.privat
 data:
   uid: "{{ treffer[0].uid }}"
   recurrence_id: "{{ treffer[0].recurrence_id or '' }}"
@@ -292,7 +292,7 @@ In der Oberfläche (*Entwicklerwerkzeuge → Aktionen* oder im Automationseditor
 action: advanced_google_calendar.sync_calendar
 data:
   source_entity_id: calendar.arbeit_firma_de_termine  # Quelle
-  target_entity_id: calendar.ich_gmail_com_familie    # Ziel (Abbild)
+  target_entity_id: calendar.familie    # Ziel (Abbild)
   days_past: 7          # Tage in die Vergangenheit (0–365, Standard 7)
   days_future: 60       # Tage in die Zukunft (0–730, Standard 30)
   include_details: true # Beschreibung und Ort mitkopieren (Standard true)
@@ -334,7 +334,7 @@ actions:
   - action: advanced_google_calendar.sync_calendar
     data:
       source_entity_id: calendar.arbeit_firma_de_termine
-      target_entity_id: calendar.ich_gmail_com_familie
+      target_entity_id: calendar.familie
       days_past: 1
       days_future: 60
       include_details: false
@@ -353,7 +353,7 @@ Rufe die Aktion mit einem Ausdruck auf, der nichts zulässt, z. B. `include_rege
 triggers:
   - trigger: calendar
     event: start
-    entity_id: calendar.ich_gmail_com_jagd
+    entity_id: calendar.jagd
     offset: "-1:00:00"
 actions:
   - action: notify.notify

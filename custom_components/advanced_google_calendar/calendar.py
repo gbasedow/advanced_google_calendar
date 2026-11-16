@@ -94,7 +94,10 @@ class AdvancedGoogleCalendarEntity(
 ):
     """A Google calendar synchronized in both directions."""
 
-    _attr_has_entity_name = True
+    # The friendly name is only the calendar name (without the account/device
+    # name), so the calendar view shows e.g. "Privat" instead of
+    # "user@gmail.com Privat".
+    _attr_has_entity_name = False
 
     def __init__(
         self,

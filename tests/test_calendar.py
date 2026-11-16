@@ -25,9 +25,9 @@ from homeassistant.util import dt as dt_util
 
 from .conftest import ACCOUNT, FakeGoogleApi
 
-PRIVATE = "calendar.user_example_com_privat"
-HOLIDAYS = "calendar.user_example_com_feiertage"
-FAMILY = "calendar.user_example_com_familie"
+PRIVATE = "calendar.privat"
+HOLIDAYS = "calendar.feiertage"
+FAMILY = "calendar.familie"
 ALL_FEATURES = (
     CalendarEntityFeature.CREATE_EVENT
     | CalendarEntityFeature.DELETE_EVENT
@@ -553,3 +553,34 @@ async def test_options_require_one_calendar(
     )
     assert result["type"] == "form"
     assert result["errors"] == {"calendars": "no_calendar_selected"}
+
+
+async def test_friendly_name_is_calendar_name(
+    hass: HomeAssistant, setup_integration: MockConfigEntry
+) -> None:
+    """The calendar view shows only the calendar name (no account prefix)."""
+    assert hass.states.get(PRIVATE).attributes["friendly_name"] == "Privat"
+    assert hass.states.get(HOLIDAYS).attributes["friendly_name"] == "Feiertage"
+
+
+async def test_existing_entity_id_is_kept(
+    hass: HomeAssistant,
+    setup_credentials: None,
+    config_entry: MockConfigEntry,
+    fake_api: FakeGoogleApi,
+) -> None:
+    """Entities created by older versions keep their entity_id."""
+    config_entry.add_to_hass(hass)
+    er.async_get(hass).async_get_or_create(
+        "calendar",
+        DOMAIN,
+        f"{ACCOUNT}-{ACCOUNT}",
+        suggested_object_id="user_example_com_privat",
+        config_entry=config_entry,
+    )
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    state = hass.states.get("calendar.user_example_com_privat")
+    assert state is not None
+    assert state.attributes["friendly_name"] == "Privat"
+    assert hass.states.get(PRIVATE) is None
