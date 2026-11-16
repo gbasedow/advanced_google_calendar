@@ -1,0 +1,162 @@
+{
+  "application_credentials": {
+    "description": "Enter the OAuth client ID and client secret of your Google Cloud project ([Google Cloud Console]({console_url})). The client must be of type *Web application* and have the authorized redirect URI `{redirect_url}`. Step-by-step guide: [instructions]({more_info_url})."
+  },
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Pick authentication method"
+      },
+      "calendars": {
+        "title": "Select calendars",
+        "description": "Select the calendars of **{account}** that should be synchronized with Home Assistant. Each selected calendar becomes its own calendar entity. Read-only calendars are shown but cannot be modified from Home Assistant.",
+        "data": {
+          "calendars": "Synchronized calendars",
+          "scan_interval": "Polling interval (minutes)"
+        },
+        "data_description": {
+          "calendars": "Enable or disable synchronization per calendar.",
+          "scan_interval": "How often changes made in Google are fetched."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Google account",
+        "description": "The access to **{account}** is no longer valid. Please sign in again with the same Google account."
+      }
+    },
+    "error": {
+      "no_calendar_selected": "Please select at least one calendar."
+    },
+    "abort": {
+      "already_configured": "This Google account is already configured.",
+      "already_in_progress": "A setup for this account is already in progress.",
+      "reauth_successful": "Re-authentication was successful.",
+      "wrong_account": "You signed in with a different Google account. Please use the account of this entry.",
+      "cannot_connect": "Could not connect to the Google Calendar API.",
+      "no_primary_calendar": "No primary calendar found for this Google account.",
+      "missing_configuration": "The integration is not configured. Please add application credentials first.",
+      "missing_credentials": "Application credentials are missing. Please add the OAuth client ID and secret.",
+      "authorize_url_timeout": "Timeout generating the authorize URL.",
+      "no_url_available": "No URL available. Please check the external URL / My Home Assistant settings.",
+      "oauth_error": "Received invalid token data.",
+      "oauth_failed": "Error while obtaining the access token.",
+      "oauth_timeout": "Timeout resolving the OAuth token.",
+      "oauth_unauthorized": "OAuth authorization error (invalid client ID or secret?).",
+      "user_rejected_authorize": "Authorization was rejected: {error}"
+    },
+    "create_entry": {
+      "default": "Successfully authenticated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Synchronized calendars",
+        "description": "Select the calendars of **{account}** that should be synchronized with Home Assistant. Each selected calendar becomes its own calendar entity. Read-only calendars are shown but cannot be modified from Home Assistant.",
+        "data": {
+          "calendars": "Synchronized calendars",
+          "scan_interval": "Polling interval (minutes)"
+        },
+        "data_description": {
+          "calendars": "Enable or disable synchronization per calendar.",
+          "scan_interval": "How often changes made in Google are fetched."
+        }
+      }
+    },
+    "error": {
+      "no_calendar_selected": "Please select at least one calendar."
+    },
+    "abort": {
+      "not_loaded": "The integration must be loaded to change the calendars. Check the connection or re-authenticate.",
+      "cannot_connect": "Could not load the calendar list from Google."
+    }
+  },
+  "services": {
+    "list_events": {
+      "name": "List events (with IDs)",
+      "description": "Returns the events of a calendar including uid, recurrence_id and rrule, needed for update_event / delete_event.",
+      "fields": {
+        "start_date_time": {
+          "name": "Start",
+          "description": "Start of the period (default: now)."
+        },
+        "end_date_time": {
+          "name": "End",
+          "description": "End of the period."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Length of the period instead of an end (default: 1 day)."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Update event",
+      "description": "Changes an event in Google Calendar. Only the given fields are changed.",
+      "fields": {
+        "uid": {
+          "name": "UID",
+          "description": "ID of the event or series (from list_events)."
+        },
+        "recurrence_id": {
+          "name": "Recurrence ID",
+          "description": "ID of a single occurrence of a series. Empty = whole event/series."
+        },
+        "recurrence_range": {
+          "name": "Range",
+          "description": "THISANDFUTURE = this and all following occurrences; empty = only this occurrence."
+        },
+        "summary": {
+          "name": "Title",
+          "description": "New title."
+        },
+        "description": {
+          "name": "Description",
+          "description": "New description."
+        },
+        "location": {
+          "name": "Location",
+          "description": "New location."
+        },
+        "start_date_time": {
+          "name": "Start time",
+          "description": "New start (timed event)."
+        },
+        "end_date_time": {
+          "name": "End time",
+          "description": "New end (timed event)."
+        },
+        "start_date": {
+          "name": "Start date",
+          "description": "New start (all-day event)."
+        },
+        "end_date": {
+          "name": "End date",
+          "description": "New end (all-day event, exclusive)."
+        },
+        "rrule": {
+          "name": "Recurrence rule",
+          "description": "RFC 5545 RRULE without 'RRULE:' prefix. Empty string removes the recurrence."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Delete event",
+      "description": "Deletes an event, a single occurrence or a part of a series in Google Calendar.",
+      "fields": {
+        "uid": {
+          "name": "UID",
+          "description": "ID of the event or series (from list_events)."
+        },
+        "recurrence_id": {
+          "name": "Recurrence ID",
+          "description": "ID of a single occurrence. Empty = delete the whole event/series."
+        },
+        "recurrence_range": {
+          "name": "Range",
+          "description": "THISANDFUTURE = this and all following occurrences; empty = only this occurrence."
+        }
+      }
+    }
+  }
+}

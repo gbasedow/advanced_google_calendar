@@ -1,0 +1,13 @@
+{
+  "domain": "advanced_google_calendar",
+  "name": "Advanced Google Calendar",
+  "codeowners": ["@gbasedow"],
+  "config_flow": true,
+  "dependencies": ["application_credentials"],
+  "documentation": "https://github.com/gbasedow/advanced_google_calendar",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/gbasedow/advanced_google_calendar/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,162 @@
+{
+  "application_credentials": {
+    "description": "Gib die OAuth-Client-ID und den Clientschlüssel deines Google-Cloud-Projekts ein ([Google Cloud Console]({console_url})). Der Client muss vom Typ *Webanwendung* sein und die autorisierte Weiterleitungs-URI `{redirect_url}` besitzen. Schritt-für-Schritt: [Anleitung]({more_info_url})."
+  },
+  "config": {
+    "step": {
+      "pick_implementation": {
+        "title": "Authentifizierungsmethode wählen"
+      },
+      "calendars": {
+        "title": "Kalender auswählen",
+        "description": "Wähle die Kalender von **{account}**, die mit Home Assistant synchronisiert werden sollen. Jeder ausgewählte Kalender wird eine eigene Kalender-Entität. Kalender mit Leserechten werden angezeigt, können aber nicht aus Home Assistant geändert werden.",
+        "data": {
+          "calendars": "Synchronisierte Kalender",
+          "scan_interval": "Abfrageintervall (Minuten)"
+        },
+        "data_description": {
+          "calendars": "Synchronisation je Kalender ein- oder ausschalten.",
+          "scan_interval": "Wie oft in Google vorgenommene Änderungen abgeholt werden."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Google-Konto erneut anmelden",
+        "description": "Der Zugriff auf **{account}** ist nicht mehr gültig. Bitte melde dich erneut mit demselben Google-Konto an."
+      }
+    },
+    "error": {
+      "no_calendar_selected": "Bitte mindestens einen Kalender auswählen."
+    },
+    "abort": {
+      "already_configured": "Dieses Google-Konto ist bereits eingerichtet.",
+      "already_in_progress": "Für dieses Konto läuft bereits eine Einrichtung.",
+      "reauth_successful": "Die erneute Anmeldung war erfolgreich.",
+      "wrong_account": "Du hast dich mit einem anderen Google-Konto angemeldet. Bitte verwende das Konto dieses Eintrags.",
+      "cannot_connect": "Verbindung zur Google Calendar API fehlgeschlagen.",
+      "no_primary_calendar": "Für dieses Google-Konto wurde kein Hauptkalender gefunden.",
+      "missing_configuration": "Die Integration ist nicht konfiguriert. Bitte zuerst Anmeldedaten (Application Credentials) hinterlegen.",
+      "missing_credentials": "Es fehlen Anmeldedaten. Bitte OAuth-Client-ID und Clientschlüssel hinterlegen.",
+      "authorize_url_timeout": "Zeitüberschreitung beim Erzeugen der Autorisierungs-URL.",
+      "no_url_available": "Keine URL verfügbar. Bitte externe URL bzw. My-Home-Assistant-Einstellungen prüfen.",
+      "oauth_error": "Ungültige Token-Daten empfangen.",
+      "oauth_failed": "Fehler beim Abrufen des Zugriffstokens.",
+      "oauth_timeout": "Zeitüberschreitung beim Abrufen des OAuth-Tokens.",
+      "oauth_unauthorized": "OAuth-Autorisierungsfehler (Client-ID oder Clientschlüssel falsch?).",
+      "user_rejected_authorize": "Die Autorisierung wurde abgelehnt: {error}"
+    },
+    "create_entry": {
+      "default": "Erfolgreich angemeldet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Synchronisierte Kalender",
+        "description": "Wähle die Kalender von **{account}**, die mit Home Assistant synchronisiert werden sollen. Jeder ausgewählte Kalender wird eine eigene Kalender-Entität. Kalender mit Leserechten werden angezeigt, können aber nicht aus Home Assistant geändert werden.",
+        "data": {
+          "calendars": "Synchronisierte Kalender",
+          "scan_interval": "Abfrageintervall (Minuten)"
+        },
+        "data_description": {
+          "calendars": "Synchronisation je Kalender ein- oder ausschalten.",
+          "scan_interval": "Wie oft in Google vorgenommene Änderungen abgeholt werden."
+        }
+      }
+    },
+    "error": {
+      "no_calendar_selected": "Bitte mindestens einen Kalender auswählen."
+    },
+    "abort": {
+      "not_loaded": "Die Integration muss geladen sein, um Kalender zu ändern. Bitte Verbindung prüfen oder neu anmelden.",
+      "cannot_connect": "Die Kalenderliste konnte nicht von Google geladen werden."
+    }
+  },
+  "services": {
+    "list_events": {
+      "name": "Termine auflisten (mit IDs)",
+      "description": "Liefert die Termine eines Kalenders inkl. uid, recurrence_id und rrule, die für update_event / delete_event benötigt werden.",
+      "fields": {
+        "start_date_time": {
+          "name": "Beginn",
+          "description": "Beginn des Zeitraums (Standard: jetzt)."
+        },
+        "end_date_time": {
+          "name": "Ende",
+          "description": "Ende des Zeitraums."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Länge des Zeitraums statt eines Endes (Standard: 1 Tag)."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Termin ändern",
+      "description": "Ändert einen Termin im Google Kalender. Nur die angegebenen Felder werden geändert.",
+      "fields": {
+        "uid": {
+          "name": "UID",
+          "description": "ID des Termins bzw. der Serie (aus list_events)."
+        },
+        "recurrence_id": {
+          "name": "Recurrence ID",
+          "description": "ID eines einzelnen Serientermins. Leer = ganzer Termin/ganze Serie."
+        },
+        "recurrence_range": {
+          "name": "Bereich",
+          "description": "THISANDFUTURE = dieser und alle folgenden Termine; leer = nur dieser Termin."
+        },
+        "summary": {
+          "name": "Titel",
+          "description": "Neuer Titel."
+        },
+        "description": {
+          "name": "Beschreibung",
+          "description": "Neue Beschreibung."
+        },
+        "location": {
+          "name": "Ort",
+          "description": "Neuer Ort."
+        },
+        "start_date_time": {
+          "name": "Startzeit",
+          "description": "Neuer Beginn (Termin mit Uhrzeit)."
+        },
+        "end_date_time": {
+          "name": "Endzeit",
+          "description": "Neues Ende (Termin mit Uhrzeit)."
+        },
+        "start_date": {
+          "name": "Startdatum",
+          "description": "Neuer Beginn (ganztägig)."
+        },
+        "end_date": {
+          "name": "Enddatum",
+          "description": "Neues Ende (ganztägig, exklusiv)."
+        },
+        "rrule": {
+          "name": "Wiederholungsregel",
+          "description": "RRULE nach RFC 5545 ohne Präfix 'RRULE:'. Leerer Text entfernt die Wiederholung."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Termin löschen",
+      "description": "Löscht einen Termin, einen einzelnen Serientermin oder einen Teil einer Serie im Google Kalender.",
+      "fields": {
+        "uid": {
+          "name": "UID",
+          "description": "ID des Termins bzw. der Serie (aus list_events)."
+        },
+        "recurrence_id": {
+          "name": "Recurrence ID",
+          "description": "ID eines einzelnen Serientermins. Leer = ganzen Termin/ganze Serie löschen."
+        },
+        "recurrence_range": {
+          "name": "Bereich",
+          "description": "THISANDFUTURE = dieser und alle folgenden Termine; leer = nur dieser Termin."
+        }
+      }
+    }
+  }
+}

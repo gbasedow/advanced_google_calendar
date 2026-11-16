@@ -1,0 +1,88 @@
+list_events:
+  target:
+    entity:
+      integration: advanced_google_calendar
+      domain: calendar
+  fields:
+    start_date_time:
+      example: "2026-11-16 00:00:00"
+      selector:
+        datetime:
+    end_date_time:
+      example: "2026-11-23 00:00:00"
+      selector:
+        datetime:
+    duration:
+      selector:
+        duration:
+
+update_event:
+  target:
+    entity:
+      integration: advanced_google_calendar
+      domain: calendar
+  fields:
+    uid:
+      required: true
+      example: "abc123def456"
+      selector:
+        text:
+    recurrence_id:
+      example: "abc123def456_20261120T090000Z"
+      selector:
+        text:
+    recurrence_range:
+      selector:
+        select:
+          options:
+            - ""
+            - "THISANDFUTURE"
+    summary:
+      example: "Training"
+      selector:
+        text:
+    description:
+      selector:
+        text:
+          multiline: true
+    location:
+      selector:
+        text:
+    start_date_time:
+      selector:
+        datetime:
+    end_date_time:
+      selector:
+        datetime:
+    start_date:
+      selector:
+        date:
+    end_date:
+      selector:
+        date:
+    rrule:
+      example: "FREQ=WEEKLY;BYDAY=MO,WE"
+      selector:
+        text:
+
+delete_event:
+  target:
+    entity:
+      integration: advanced_google_calendar
+      domain: calendar
+  fields:
+    uid:
+      required: true
+      example: "abc123def456"
+      selector:
+        text:
+    recurrence_id:
+      example: "abc123def456_20261120T090000Z"
+      selector:
+        text:
+    recurrence_range:
+      selector:
+        select:
+          options:
+            - ""
+            - "THISANDFUTURE"
