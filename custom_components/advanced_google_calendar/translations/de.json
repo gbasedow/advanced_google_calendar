@@ -160,39 +160,43 @@
     },
     "sync_calendar": {
       "name": "Kalender spiegeln (einseitig)",
-      "description": "Spiegelt die Termine eines Quellkalenders einseitig in den Zielkalender (diesen Google-Kalender). Im Ziel werden nur Termine geändert oder gelöscht, die von dieser Synchronisation angelegt wurden; geänderte Optionen werden beim nächsten Lauf auf bereits gespiegelte Termine angewendet.",
+      "description": "Kopiert die Termine eines Quellkalenders einseitig in einen Google-Zielkalender. Die Quelle wird nur gelesen und nie verändert. Im Ziel werden ausschließlich Termine angelegt, geändert oder gelöscht, die diese Aktion selbst erstellt hat – deine eigenen Termine dort bleiben unberührt. Geänderte Optionen werden beim nächsten Lauf auch auf bereits gespiegelte Termine angewendet. Für eine laufende Spiegelung die Aktion regelmäßig per Automation ausführen.",
       "fields": {
         "source_entity_id": {
           "name": "Quellkalender",
-          "description": "Kalender, dessen Termine gespiegelt werden. Jeder Home-Assistant-Kalender ist möglich."
+          "description": "Kalender, aus dem die Termine gelesen werden. Jeder Kalender in Home Assistant ist möglich (Google, Lokaler Kalender, CalDAV, …). Die Quelle wird nie verändert."
+        },
+        "target_entity_id": {
+          "name": "Zielkalender",
+          "description": "Google-Kalender dieser Integration, in den die Kopien geschrieben werden. Du brauchst Schreibrechte darauf. Er muss sich vom Quellkalender unterscheiden."
         },
         "days_past": {
           "name": "Tage in der Vergangenheit",
-          "description": "Wie viele Tage ab heute rückwärts synchronisiert werden."
+          "description": "Anzahl Tage vor heute, die synchronisiert werden (0 = ab heute). Ältere gespiegelte Termine bleiben unverändert. Sind Vergangenheit und Zukunft beide 0, werden nur die Termine von heute synchronisiert."
         },
         "days_future": {
           "name": "Tage in der Zukunft",
-          "description": "Wie viele Tage ab heute vorwärts synchronisiert werden."
+          "description": "Anzahl Tage nach heute, die synchronisiert werden (0 = bis heute). Termine, die weiter in der Zukunft liegen, werden bei einem späteren Lauf gespiegelt, sobald sie in den Zeitraum rücken."
         },
         "include_details": {
-          "name": "Details übernehmen",
-          "description": "Beschreibung und Ort kopieren. Wenn deaktiviert, werden nur Titel und Zeiten gespiegelt."
+          "name": "Beschreibung und Ort übernehmen",
+          "description": "An: Beschreibung und Ort werden mitkopiert. Aus: Es werden nur Titel und Zeiten kopiert; Beschreibung und Ort der Kopien werden geleert – auch bei bereits gespiegelten Terminen."
         },
         "include_all_day": {
           "name": "Ganztägige Termine übernehmen",
-          "description": "Ganztägige Termine spiegeln."
+          "description": "An: Ganztägige Termine werden mitgespiegelt. Aus: Ganztägige Termine werden ausgelassen und bereits angelegte Kopien entfernt."
         },
         "include_regex": {
           "name": "Nur Titel passend zu",
-          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung). Nur Termine, deren Titel passt, werden gespiegelt."
+          "description": "Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung, Treffer irgendwo im Titel genügt). Nur passende Termine werden gespiegelt, z. B. 'Training|Jagd'. Leer lassen, um alle Termine zu spiegeln."
         },
         "exclude_regex": {
           "name": "Titel ausschließen",
-          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung). Termine, deren Titel passt, werden nicht gespiegelt. Hat Vorrang vor dem Einschluss-Ausdruck."
+          "description": "Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung). Passende Termine werden nicht gespiegelt und vorhandene Kopien entfernt, z. B. 'privat|Arzt'. Hat Vorrang vor „Nur Titel passend zu“. Leer lassen, um nichts auszuschließen."
         },
         "dry_run": {
           "name": "Probelauf",
-          "description": "Änderungen nur berechnen und zurückgeben, nichts schreiben."
+          "description": "An: Es wird nichts geschrieben. Die Aktion liefert nur zurück, welche Termine angelegt, geändert oder gelöscht würden (Anzeige als Antwort). Praktisch zum Testen der Filter."
         }
       }
     }

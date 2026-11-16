@@ -1,11 +1,21 @@
-"""Entity services of Advanced Google Calendar."""
+"""Actions (services) of Advanced Google Calendar."""
 
 from __future__ import annotations
 
 import voluptuous as vol
 
-from homeassistant.components.calendar import DOMAIN as CALENDAR_DOMAIN
-from homeassistant.core import HomeAssistant, SupportsResponse, callback
+from homeassistant.components.calendar import (
+    DATA_COMPONENT as CALENDAR_DATA_COMPONENT,
+    DOMAIN as CALENDAR_DOMAIN,
+)
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+    callback,
+)
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, service
 from homeassistant.helpers.typing import VolDictType
 
@@ -29,6 +39,7 @@ from .const import (
     ATTR_START_DATE,
     ATTR_START_DATE_TIME,
     ATTR_SUMMARY,
+    ATTR_TARGET_ENTITY_ID,
     ATTR_UID,
     DEFAULT_DAYS_FUTURE,
     DEFAULT_DAYS_PAST,
@@ -70,20 +81,42 @@ LIST_EVENTS_SCHEMA: VolDictType = {
     vol.Exclusive(ATTR_DURATION, "end"): vol.All(cv.time_period, cv.positive_timedelta),
 }
 
-SYNC_CALENDAR_SCHEMA: VolDictType = {
-    vol.Required(ATTR_SOURCE_ENTITY_ID): cv.entity_domain(CALENDAR_DOMAIN),
-    vol.Optional(ATTR_DAYS_PAST, default=DEFAULT_DAYS_PAST): vol.All(
-        vol.Coerce(int), vol.Range(min=0, max=MAX_DAYS_PAST)
-    ),
-    vol.Optional(ATTR_DAYS_FUTURE, default=DEFAULT_DAYS_FUTURE): vol.All(
-        vol.Coerce(int), vol.Range(min=0, max=MAX_DAYS_FUTURE)
-    ),
-    vol.Optional(ATTR_INCLUDE_DETAILS, default=True): cv.boolean,
-    vol.Optional(ATTR_INCLUDE_ALL_DAY, default=True): cv.boolean,
-    vol.Optional(ATTR_INCLUDE_REGEX): vol.Any(None, cv.string),
-    vol.Optional(ATTR_EXCLUDE_REGEX): vol.Any(None, cv.string),
-    vol.Optional(ATTR_DRY_RUN, default=False): cv.boolean,
-}
+SYNC_CALENDAR_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_SOURCE_ENTITY_ID): cv.entity_domain(CALENDAR_DOMAIN),
+        vol.Required(ATTR_TARGET_ENTITY_ID): cv.entity_domain(CALENDAR_DOMAIN),
+        vol.Required(ATTR_DAYS_PAST, default=DEFAULT_DAYS_PAST): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=MAX_DAYS_PAST)
+        ),
+        vol.Required(ATTR_DAYS_FUTURE, default=DEFAULT_DAYS_FUTURE): vol.All(
+            vol.Coerce(int), vol.Range(min=0, max=MAX_DAYS_FUTURE)
+        ),
+        vol.Optional(ATTR_INCLUDE_DETAILS, default=True): cv.boolean,
+        vol.Optional(ATTR_INCLUDE_ALL_DAY, default=True): cv.boolean,
+        # Empty expression = filter not active
+        vol.Optional(ATTR_INCLUDE_REGEX, default=""): vol.Any(None, cv.string),
+        vol.Optional(ATTR_EXCLUDE_REGEX, default=""): vol.Any(None, cv.string),
+        vol.Optional(ATTR_DRY_RUN, default=False): cv.boolean,
+    }
+)
+
+
+async def _async_sync_calendar(call: ServiceCall) -> ServiceResponse:
+    """Mirror the source calendar one-way into the target calendar."""
+    data = dict(call.data)
+    target_entity_id: str = data.pop(ATTR_TARGET_ENTITY_ID)
+    target = call.hass.data[CALENDAR_DATA_COMPONENT].get_entity(target_entity_id)
+    if (
+        target is None
+        or target.platform is None
+        or target.platform.platform_name != DOMAIN
+    ):
+        raise ServiceValidationError(
+            f"Target calendar {target_entity_id} is not a calendar of the "
+            "Advanced Google Calendar integration"
+        )
+    result: ServiceResponse = await target.async_sync_calendar_service(**data)  # type: ignore[attr-defined]
+    return result if call.return_response else None
 
 
 @callback
@@ -114,12 +147,10 @@ def async_setup_services(hass: HomeAssistant) -> None:
         func="async_list_events_service",
         supports_response=SupportsResponse.ONLY,
     )
-    service.async_register_platform_entity_service(
-        hass,
+    hass.services.async_register(
         DOMAIN,
         SERVICE_SYNC_CALENDAR,
-        entity_domain=CALENDAR_DOMAIN,
+        _async_sync_calendar,
         schema=SYNC_CALENDAR_SCHEMA,
-        func="async_sync_calendar_service",
         supports_response=SupportsResponse.OPTIONAL,
     )

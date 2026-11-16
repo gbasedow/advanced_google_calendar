@@ -160,39 +160,43 @@
     },
     "sync_calendar": {
       "name": "Mirror calendar (one-way)",
-      "description": "Mirrors the events of a source calendar one-way into the target calendar (this Google calendar). Only events created by this sync are changed or deleted in the target; changed options are applied to already mirrored events on the next run.",
+      "description": "Copies the events of a source calendar one-way into a target Google calendar. The source is only read and never changed. In the target only events created by this action are created, updated or deleted – your own events there stay untouched. Changed options are applied to already mirrored events on the next run. Run it regularly with an automation to keep the mirror up to date.",
       "fields": {
         "source_entity_id": {
           "name": "Source calendar",
-          "description": "Calendar whose events are mirrored. Any Home Assistant calendar can be used."
+          "description": "The calendar the events are read from. Any calendar in Home Assistant can be used (Google, local calendar, CalDAV, …). The source is never modified."
+        },
+        "target_entity_id": {
+          "name": "Target calendar",
+          "description": "The Google calendar of this integration that receives the copies. You need write access to it. It must be a different calendar than the source."
         },
         "days_past": {
           "name": "Days in the past",
-          "description": "How many days back from today are synchronized."
+          "description": "Number of days before today that are synchronized (0 = start today). Mirrored events older than this are left untouched. With 0 days in the past and 0 days in the future only today's events are synchronized."
         },
         "days_future": {
           "name": "Days in the future",
-          "description": "How many days ahead of today are synchronized."
+          "description": "Number of days after today that are synchronized (0 = end today). Events further in the future are mirrored on a later run as soon as they move into the period."
         },
         "include_details": {
-          "name": "Include details",
-          "description": "Copy description and location. If disabled, only title and times are mirrored."
+          "name": "Copy description and location",
+          "description": "On: description and location are copied. Off: only title and times are copied, description and location of the copies are emptied – also for events mirrored earlier."
         },
         "include_all_day": {
-          "name": "Include all-day events",
-          "description": "Mirror all-day events."
+          "name": "Copy all-day events",
+          "description": "On: all-day events are mirrored as well. Off: all-day events are skipped and copies created earlier are removed."
         },
         "include_regex": {
           "name": "Only titles matching",
-          "description": "Regular expression (case-insensitive). Only events whose title matches are mirrored."
+          "description": "Regular expression on the event title (case-insensitive, matches anywhere in the title). Only matching events are mirrored, e.g. 'Training|Jagd'. Leave empty to mirror all events."
         },
         "exclude_regex": {
           "name": "Exclude titles matching",
-          "description": "Regular expression (case-insensitive). Events whose title matches are not mirrored. Takes precedence over the include expression."
+          "description": "Regular expression on the event title (case-insensitive). Matching events are not mirrored and existing copies are removed, e.g. 'privat|Arzt'. Takes precedence over 'Only titles matching'. Leave empty to exclude nothing."
         },
         "dry_run": {
           "name": "Dry run",
-          "description": "Only calculate and return the changes, do not write anything."
+          "description": "On: nothing is written. The action only returns which events would be created, updated or deleted (shown as response). Useful to test the filters."
         }
       }
     }

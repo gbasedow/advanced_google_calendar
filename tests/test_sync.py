@@ -8,6 +8,7 @@ from typing import Any
 from freezegun.api import FrozenDateTimeFactory
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+import voluptuous as vol
 
 from custom_components.advanced_google_calendar.api import GoogleCalendarApiError
 from custom_components.advanced_google_calendar.const import DOMAIN
@@ -92,11 +93,11 @@ async def _sync(hass: HomeAssistant, **data: Any) -> dict[str, Any]:
     response = await hass.services.async_call(
         DOMAIN,
         "sync_calendar",
-        {"entity_id": TARGET, "source_entity_id": SOURCE, **data},
+        {"target_entity_id": TARGET, "source_entity_id": SOURCE, **data},
         blocking=True,
         return_response=True,
     )
-    return response[TARGET]
+    return response
 
 
 def _mirrors(api: FakeGoogleApi) -> dict[str, dict[str, Any]]:
@@ -291,13 +292,23 @@ async def test_validation(
     with pytest.raises(ServiceValidationError, match="not found"):
         await _sync(hass, source_entity_id="calendar.does_not_exist")
     with pytest.raises(ServiceValidationError, match="read-only"):
+        await _sync(hass, target_entity_id=READ_ONLY)
+    # Target must be a calendar of this integration
+    with pytest.raises(ServiceValidationError, match="not a calendar"):
+        await _sync(hass, target_entity_id=SOURCE, source_entity_id=TARGET)
+    with pytest.raises(ServiceValidationError, match="not a calendar"):
+        await _sync(hass, target_entity_id="calendar.does_not_exist")
+    # Target and days are required
+    with pytest.raises(vol.Invalid):
         await hass.services.async_call(
             DOMAIN,
             "sync_calendar",
-            {"entity_id": READ_ONLY, "source_entity_id": SOURCE},
+            {"source_entity_id": SOURCE},
             blocking=True,
             return_response=True,
         )
+    with pytest.raises(vol.Invalid):
+        await _sync(hass, days_past=-1)
     assert fake_api.calls == []
 
 
@@ -376,3 +387,40 @@ async def test_remove_mirror_with_never_matching_regex(
     result = await _sync(hass, include_regex="^$a")
     assert result["deleted"] == 2
     assert _mirrors(fake_api) == {}
+
+
+async def test_only_today(
+    hass: HomeAssistant,
+    fake_api: FakeGoogleApi,
+    source: FakeSource,
+    freezer: FrozenDateTimeFactory,
+) -> None:
+    """0 days past and 0 days future synchronize today only."""
+    freezer.move_to("2026-11-16T10:30:00+01:00")
+    await _sync(hass, days_past=0, days_future=0)
+    tz = dt_util.get_time_zone("Europe/Berlin")
+    assert source.calls[-1] == (
+        datetime(2026, 11, 16, 0, 0, tzinfo=tz),
+        datetime(2026, 11, 17, 0, 0, tzinfo=tz),
+    )
+
+
+async def test_defaults_and_empty_filters(
+    hass: HomeAssistant, fake_api: FakeGoogleApi, source: FakeSource
+) -> None:
+    """Defaults are 7/30 days, empty expressions do not filter, no response."""
+    result = await _sync(hass, include_regex="", exclude_regex="")
+    assert result["created"] == 2
+
+    # Called without days and without response (as in an automation)
+    assert (
+        await hass.services.async_call(
+            DOMAIN,
+            "sync_calendar",
+            {"source_entity_id": SOURCE, "target_entity_id": TARGET},
+            blocking=True,
+        )
+        is None
+    )
+    start, end = source.calls[-1]
+    assert (end - start).days == 7 + 30 + 1

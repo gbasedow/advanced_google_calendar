@@ -51,6 +51,7 @@ ATTR_DURATION: Final = "duration"
 
 # One-way calendar sync
 ATTR_SOURCE_ENTITY_ID: Final = "source_entity_id"
+ATTR_TARGET_ENTITY_ID: Final = "target_entity_id"
 ATTR_DAYS_PAST: Final = "days_past"
 ATTR_DAYS_FUTURE: Final = "days_future"
 ATTR_INCLUDE_DETAILS: Final = "include_details"

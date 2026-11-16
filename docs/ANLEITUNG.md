@@ -283,31 +283,33 @@ data:
 ### Kalender spiegeln (einseitig)
 
 Mit `advanced_google_calendar.sync_calendar` überträgst du die Termine eines **Quellkalenders** in einen **Zielkalender**, und zwar nur in diese eine Richtung.
-- **Ziel** (`target`): ein beschreibbarer Google-Kalender dieser Integration.
-- **Quelle** (`source_entity_id`): **jeder** Kalender in Home Assistant, also auch ein Google-Kalender eines anderen Kontos, ein lokaler Kalender, CalDAV oder ein Müllabfuhrkalender.
+- **Quelle** (`source_entity_id`): **jeder** Kalender in Home Assistant, also auch ein Google-Kalender eines anderen Kontos, ein lokaler Kalender, CalDAV oder ein Müllabfuhrkalender. Die Quelle wird nur gelesen.
+- **Ziel** (`target_entity_id`): ein beschreibbarer Google-Kalender dieser Integration.
+
+In der Oberfläche (*Entwicklerwerkzeuge → Aktionen* oder im Automationseditor) wählst du beide Kalender oben per Auswahlliste aus. Jedes Feld der Maske ist dort beschrieben.
 
 ```yaml
 action: advanced_google_calendar.sync_calendar
-target:
-  entity_id: calendar.ich_gmail_com_familie        # Ziel (Abbild)
 data:
   source_entity_id: calendar.arbeit_firma_de_termine  # Quelle
+  target_entity_id: calendar.ich_gmail_com_familie    # Ziel (Abbild)
   days_past: 7          # Tage in die Vergangenheit (0–365, Standard 7)
   days_future: 60       # Tage in die Zukunft (0–730, Standard 30)
   include_details: true # Beschreibung und Ort mitkopieren (Standard true)
   include_all_day: true # ganztägige Termine mitkopieren (Standard true)
-  include_regex: ""     # optional: nur Titel, die hierauf passen
-  exclude_regex: "privat|arzt"   # optional: diese Titel auslassen
+  include_regex: ""     # leer = kein Filter; sonst nur passende Titel
+  exclude_regex: "privat|arzt"   # leer = nichts ausschließen
+  dry_run: false        # true = nur anzeigen, nichts schreiben
 response_variable: ergebnis
 ```
 
 | Parameter | Bedeutung |
 |---|---|
-| `days_past` / `days_future` | Zeitraum ab dem heutigen Tag (ganze Tage). Termine **außerhalb** des Zeitraums werden im Ziel nicht verändert, auch keine alten Abbilder. |
+| `days_past` / `days_future` | Pflichtfelder. Zeitraum ab dem heutigen Tag (ganze Tage). **Beide 0 = nur die Termine von heute.** Termine **außerhalb** des Zeitraums werden im Ziel nicht verändert, auch keine alten Abbilder. |
 | `include_details` | `false`: nur Titel und Zeiten werden übertragen, Beschreibung und Ort bleiben im Abbild leer. |
 | `include_all_day` | `false`: ganztägige Termine werden nicht gespiegelt. |
-| `include_regex` | Regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
-| `exclude_regex` | Regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. Hat Vorrang vor `include_regex`. |
+| `include_regex` | Leer = Filter aus. Sonst regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
+| `exclude_regex` | Leer = Filter aus. Sonst regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. Hat Vorrang vor `include_regex`. |
 | `dry_run` | `true`: nichts schreiben, nur zurückgeben, was angelegt, geändert und gelöscht würde (Listen `to_create`, `to_update`, `to_delete`). Ideal zum Testen der regulären Ausdrücke. |
 
 **Verhalten**
@@ -330,10 +332,9 @@ triggers:
     minutes: "/15"
 actions:
   - action: advanced_google_calendar.sync_calendar
-    target:
-      entity_id: calendar.ich_gmail_com_familie
     data:
       source_entity_id: calendar.arbeit_firma_de_termine
+      target_entity_id: calendar.ich_gmail_com_familie
       days_past: 1
       days_future: 60
       include_details: false

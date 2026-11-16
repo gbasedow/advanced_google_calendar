@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 – 2026-11-16
+
+- Maske der Aktion `sync_calendar` überarbeitet:
+  - Quellkalender steht an erster Stelle, der Zielkalender wird darunter ebenfalls
+    per Auswahlliste gewählt (neues Feld `target_entity_id`).
+  - `days_past` / `days_future` sind Pflichtfelder (Standard 7 / 30);
+    beide 0 = nur die Termine von heute.
+  - Keine Auswahl-Checkboxen mehr bei den Regex-Feldern und beim Probelauf;
+    leere Regex-Felder bedeuten „kein Filter“.
+  - Ausführliche Beschreibungen für alle Felder (Deutsch/Englisch).
+- **Breaking Change:** Das Ziel wird nicht mehr über `target: entity_id:` angegeben,
+  sondern über `target_entity_id`. Bestehende Automationen bitte anpassen.
+
 ## 0.2.0 – 2026-11-16
 
 - Neue Aktion `advanced_google_calendar.sync_calendar`: spiegelt einen beliebigen
