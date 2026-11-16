@@ -19,7 +19,6 @@ from homeassistant.components.calendar import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
@@ -43,7 +42,6 @@ from .const import (
     ATTR_UID,
     DEFAULT_DAYS_FUTURE,
     DEFAULT_DAYS_PAST,
-    DOMAIN,
     PROP_SOURCE,
     RANGE_THIS_AND_FUTURE,
     RRULE_PREFIX,
@@ -94,9 +92,9 @@ class AdvancedGoogleCalendarEntity(
 ):
     """A Google calendar synchronized in both directions."""
 
-    # The friendly name is only the calendar name (without the account/device
-    # name), so the calendar view shows e.g. "Privat" instead of
-    # "user@gmail.com Privat".
+    # Entities are not attached to a device, so that every place in the UI
+    # (including the calendar panel, which prefixes the device name) shows
+    # only the calendar name, e.g. "Privat".
     _attr_has_entity_name = False
 
     def __init__(
@@ -112,13 +110,6 @@ class AdvancedGoogleCalendarEntity(
         self._entry = entry
         self._attr_unique_id = f"{entry.unique_id}-{calendar.calendar_id}"
         self._attr_name = calendar.summary
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, str(entry.unique_id))},
-            name=entry.title,
-            manufacturer="Google",
-            model="Google Calendar",
-            entry_type=DeviceEntryType.SERVICE,
-        )
         if calendar.writable:
             self._attr_supported_features = (
                 CalendarEntityFeature.CREATE_EVENT

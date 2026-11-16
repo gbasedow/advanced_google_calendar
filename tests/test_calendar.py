@@ -20,7 +20,7 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import ATTR_SUPPORTED_FEATURES, STATE_OFF, STATE_ON
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.util import dt as dt_util
 
 from .conftest import ACCOUNT, FakeGoogleApi
@@ -584,3 +584,48 @@ async def test_existing_entity_id_is_kept(
     assert state is not None
     assert state.attributes["friendly_name"] == "Privat"
     assert hass.states.get(PRIVATE) is None
+
+
+async def test_no_device_and_legacy_device_removed(
+    hass: HomeAssistant,
+    setup_credentials: None,
+    config_entry: MockConfigEntry,
+    fake_api: FakeGoogleApi,
+) -> None:
+    """Calendars belong directly to the entry; an old device is removed."""
+    config_entry.add_to_hass(hass)
+    device_registry = dr.async_get(hass)
+    entity_registry = er.async_get(hass)
+    device = device_registry.async_get_or_create(
+        config_entry_id=config_entry.entry_id,
+        identifiers={(DOMAIN, ACCOUNT)},
+        name="Advanced Google Calendar",
+    )
+    entity_registry.async_get_or_create(
+        "calendar",
+        DOMAIN,
+        f"{ACCOUNT}-{ACCOUNT}",
+        suggested_object_id="user_example_com_privat",
+        config_entry=config_entry,
+        device_id=device.id,
+    )
+    entity_registry.async_update_entity(
+        "calendar.user_example_com_privat", name="Mein Kalender"
+    )
+
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert device_registry.async_get(device.id) is None
+    assert (
+        dr.async_entries_for_config_entry(device_registry, config_entry.entry_id) == []
+    )
+    entry = entity_registry.async_get("calendar.user_example_com_privat")
+    assert entry is not None
+    assert entry.device_id is None
+    assert entry.name == "Mein Kalender"
+    state = hass.states.get("calendar.user_example_com_privat")
+    assert state.attributes["friendly_name"] == "Mein Kalender"
+    holidays = entity_registry.async_get(HOLIDAYS)
+    assert holidays is not None
+    assert holidays.device_id is None

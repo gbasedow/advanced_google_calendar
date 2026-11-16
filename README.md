@@ -4,7 +4,7 @@ Custom-Integration, die Google-Kalender als `calendar.*`-Entitäten in Home Assi
 
 ## Funktionen
 
-- **Mehrere Google-Konten**: Jedes Konto ist ein eigener Konfigurationseintrag (eigener OAuth-Login, eigenes Gerät in HA).
+- **Mehrere Google-Konten**: Jedes Konto ist ein eigener Konfigurationseintrag (eigener OAuth-Login; die Kalender stehen als Entitäten direkt unter dem Eintrag und heißen in der Kalenderansicht genau wie ihre Entität).
 - **Kalenderauswahl per Checkbox**: Beim Einrichten und später über *Konfigurieren* lässt sich die Synchronisation für jeden Kalender (eigene, geteilte, abonnierte) einzeln ein- und ausschalten.
 - **Google → Home Assistant**: Der Zustand der Entität (aktueller bzw. nächster Termin) wird im einstellbaren Intervall (1–60 min, Standard 5 min) aktualisiert. Die Kalenderansicht im Dashboard liest den angezeigten Zeitraum immer direkt bei Google.
 - **Home Assistant → Google**: Termine **anlegen, ändern und löschen**, über die Kalenderansicht in HA, über `calendar.create_event` oder über die zusätzlichen Aktionen dieser Integration.

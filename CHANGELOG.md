@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 – 2026-11-16
+
+- Je Konfigurationseintrag (Google-Konto) wird kein Gerät mehr angelegt. Die
+  Kalender stehen als Entitäten direkt unter dem Konfigurationseintrag.
+- Dadurch zeigt die Kalenderansicht („Meine Kalender“) die Kalender genau mit dem
+  Namen ihrer Entität an, ohne das bisherige Präfix (Gerätename).
+- Ein vorhandenes Gerät aus früheren Versionen wird beim Start automatisch
+  entfernt. Entitäts-IDs, selbst vergebene Namen und Einstellungen bleiben erhalten.
+
 ## 0.4.0 – 2026-11-16
 
 - Kalender dieser Integration werden nur noch mit ihrem Kalendernamen angezeigt

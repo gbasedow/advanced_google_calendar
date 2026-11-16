@@ -154,8 +154,8 @@ Vorab:
    - Alle Kalender des Kontos werden als Checkboxen angezeigt (eigene, geteilte, abonnierte, ausgeblendete). Kalender mit 🔒 sind **nur lesbar** und können in HA nicht bearbeitet werden.
    - Der Hauptkalender ist vorausgewählt. Hake alle Kalender an, die synchronisiert werden sollen (mindestens einen).
    - **Abfrageintervall**: wie oft Änderungen aus Google abgeholt werden (1–60 Minuten, Standard 5).
-5. **Absenden**. Das Konto erscheint als Eintrag mit der E-Mail-Adresse als Titel und als Gerät, jeder gewählte Kalender als Entität `calendar.<kalendername>`, z. B. `calendar.privat`.
-   In der Kalenderansicht und überall sonst heißt der Kalender so wie in Google, ohne die E-Mail-Adresse davor. Der Hauptkalender heißt bei Google standardmäßig wie die E-Mail-Adresse. Haben zwei Konten einen gleichnamigen Kalender, hängt HA an die Entitäts-ID `_2` an. Den angezeigten Namen kannst du in den Entitätseinstellungen jederzeit ändern.
+5. **Absenden**. Das Konto erscheint als Konfigurationseintrag mit der E-Mail-Adresse als Titel. Darunter steht jeder gewählte Kalender direkt als Entität `calendar.<kalendername>`, z. B. `calendar.privat`. Ein Gerät wird bewusst nicht angelegt, sonst würde die Kalenderansicht den Gerätenamen vor jeden Kalender setzen.
+   In der Kalenderansicht („Meine Kalender“) und überall sonst heißt der Kalender wie seine Entität, ohne Präfix. Der Hauptkalender heißt bei Google standardmäßig wie die E-Mail-Adresse. Haben zwei Konten einen gleichnamigen Kalender, hängt HA an die Entitäts-ID `_2` an. Den angezeigten Namen kannst du in den Entitätseinstellungen jederzeit ändern.
 
 ## 6. Weitere Konten, Kalender an-/abwählen, Intervall
 
