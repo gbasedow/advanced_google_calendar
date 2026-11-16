@@ -9,6 +9,7 @@ Custom-Integration, die Google-Kalender als `calendar.*`-Entitäten in Home Assi
 - **Google → Home Assistant**: Der Zustand der Entität (aktueller bzw. nächster Termin) wird im einstellbaren Intervall (1–60 min, Standard 5 min) aktualisiert. Die Kalenderansicht im Dashboard liest den angezeigten Zeitraum immer direkt bei Google.
 - **Home Assistant → Google**: Termine **anlegen, ändern und löschen**, über die Kalenderansicht in HA, über `calendar.create_event` oder über die zusätzlichen Aktionen dieser Integration.
 - **Serientermine**: „Nur dieser Termin“ und „Dieser und alle folgenden Termine“ funktionieren beim Ändern und beim Löschen. Beim Aufteilen einer Serie bleiben Farbe, Erinnerungen und Sichtbarkeit erhalten.
+- **Kalender spiegeln (einseitig)**: Aktion `sync_calendar` überträgt einen beliebigen HA-Kalender in einen Google-Kalender, mit Zeitraum, Optionen und Regex-Filtern. Geänderte Optionen werden auf bestehende Abbilder angewendet.
 - **Nur-Lese-Kalender** (z. B. Feiertage) werden angezeigt, bieten aber keine Schreibfunktionen an.
 - **Reauth**: Ist der Zugriff abgelaufen oder widerrufen, meldet HA eine erneute Anmeldung. Dabei wird geprüft, dass dasselbe Konto verwendet wird.
 - Keine zusätzlichen Python-Abhängigkeiten: Die Integration spricht direkt mit der Google Calendar API v3.
@@ -33,6 +34,7 @@ Kurzfassung:
 | `advanced_google_calendar.list_events` | Termine inkl. `uid`, `recurrence_id`, `rrule` abrufen (mit Rückgabewert) |
 | `advanced_google_calendar.update_event` | Termin ändern; nur die angegebenen Felder werden geändert |
 | `advanced_google_calendar.delete_event` | Termin, einzelnen Serientermin oder „diesen und folgende“ löschen |
+| `advanced_google_calendar.sync_calendar` | Einen beliebigen Kalender einseitig in einen Google-Kalender spiegeln (Zeitraum in Tagen, Details ja/nein, Ganztägige ja/nein, Regex-Filter auf den Titel, Probelauf) |
 
 Beispiele findest du in der [Anleitung](docs/ANLEITUNG.md#7-nutzung-in-dashboard-und-automationen).
 

@@ -176,8 +176,13 @@ class GoogleCalendarApi:
         time_min: datetime,
         time_max: datetime | None = None,
         max_results: int | None = None,
+        private_extended_property: str | None = None,
     ) -> list[dict[str, Any]]:
-        """List events (recurring events expanded to single instances)."""
+        """List events (recurring events expanded to single instances).
+
+        private_extended_property ("key=value") restricts the result to events
+        carrying this private extended property.
+        """
         params: dict[str, Any] = {
             "singleEvents": "true",
             "orderBy": "startTime",
@@ -186,6 +191,8 @@ class GoogleCalendarApi:
         }
         if time_max is not None:
             params["timeMax"] = _rfc3339(time_max)
+        if private_extended_property is not None:
+            params["privateExtendedProperty"] = private_extended_property
 
         items: list[dict[str, Any]] = []
         while True:

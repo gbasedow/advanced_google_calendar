@@ -280,6 +280,72 @@ data:
   # recurrence_range: THISANDFUTURE   # optional: dieses und alle folgenden
 ```
 
+### Kalender spiegeln (einseitig)
+
+Mit `advanced_google_calendar.sync_calendar` überträgst du die Termine eines **Quellkalenders** in einen **Zielkalender**, und zwar nur in diese eine Richtung.
+- **Ziel** (`target`): ein beschreibbarer Google-Kalender dieser Integration.
+- **Quelle** (`source_entity_id`): **jeder** Kalender in Home Assistant, also auch ein Google-Kalender eines anderen Kontos, ein lokaler Kalender, CalDAV oder ein Müllabfuhrkalender.
+
+```yaml
+action: advanced_google_calendar.sync_calendar
+target:
+  entity_id: calendar.ich_gmail_com_familie        # Ziel (Abbild)
+data:
+  source_entity_id: calendar.arbeit_firma_de_termine  # Quelle
+  days_past: 7          # Tage in die Vergangenheit (0–365, Standard 7)
+  days_future: 60       # Tage in die Zukunft (0–730, Standard 30)
+  include_details: true # Beschreibung und Ort mitkopieren (Standard true)
+  include_all_day: true # ganztägige Termine mitkopieren (Standard true)
+  include_regex: ""     # optional: nur Titel, die hierauf passen
+  exclude_regex: "privat|arzt"   # optional: diese Titel auslassen
+response_variable: ergebnis
+```
+
+| Parameter | Bedeutung |
+|---|---|
+| `days_past` / `days_future` | Zeitraum ab dem heutigen Tag (ganze Tage). Termine **außerhalb** des Zeitraums werden im Ziel nicht verändert, auch keine alten Abbilder. |
+| `include_details` | `false`: nur Titel und Zeiten werden übertragen, Beschreibung und Ort bleiben im Abbild leer. |
+| `include_all_day` | `false`: ganztägige Termine werden nicht gespiegelt. |
+| `include_regex` | Regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
+| `exclude_regex` | Regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. Hat Vorrang vor `include_regex`. |
+| `dry_run` | `true`: nichts schreiben, nur zurückgeben, was angelegt, geändert und gelöscht würde (Listen `to_create`, `to_update`, `to_delete`). Ideal zum Testen der regulären Ausdrücke. |
+
+**Verhalten**
+- Neue Termine der Quelle werden angelegt, geänderte aktualisiert, gelöschte (oder nicht mehr passende) im Ziel gelöscht.
+- **Geänderte Optionen wirken auf bereits gespiegelte Termine.** Schaltest du z. B. `include_details` aus, werden beim nächsten Lauf Beschreibung und Ort aus allen vorhandenen Abbildern entfernt. Bei `include_all_day: false` oder einem geänderten Ausdruck werden nicht mehr passende Abbilder gelöscht und neu passende angelegt.
+- Im Zielkalender werden **nur Termine angefasst, die diese Synchronisation selbst angelegt hat**. Dafür trägt jedes Abbild eine unsichtbare Markierung. Deine eigenen Termine im Zielkalender bleiben unberührt. Mehrere Quellen können in denselben Zielkalender gespiegelt werden.
+- Serientermine werden als einzelne Termine gespiegelt.
+- Abbilder haben keine Erinnerungen. So bekommst du keine doppelten Benachrichtigungen.
+- Termine, die selbst ein Abbild sind, werden nicht weitergespiegelt. Ist die Quelle ein Google-Kalender dieser Integration, entsteht dadurch auch bei A→B und B→A keine Endlosschleife.
+- Rückgabe: `created`, `updated`, `deleted`, `unchanged` und `errors`. Scheitert ein einzelner Termin (z. B. wegen eines API-Limits), läuft der Rest weiter, und der Fehler steht in `errors`.
+- Die Quelle wird über ihre interne Registry-ID zugeordnet. Benennst du die Quell-Entität um, bleiben die vorhandenen Abbilder daher erhalten.
+
+**Regelmäßig ausführen**: Die Aktion läuft nur, wenn sie aufgerufen wird. Für eine laufende Spiegelung eine Automation anlegen, z. B. alle 15 Minuten:
+
+```yaml
+alias: Arbeitskalender in Familienkalender spiegeln
+mode: single
+triggers:
+  - trigger: time_pattern
+    minutes: "/15"
+actions:
+  - action: advanced_google_calendar.sync_calendar
+    target:
+      entity_id: calendar.ich_gmail_com_familie
+    data:
+      source_entity_id: calendar.arbeit_firma_de_termine
+      days_past: 1
+      days_future: 60
+      include_details: false
+      exclude_regex: "privat"
+```
+
+> **Tipp:** Wechselst du zwischen zwei Konfigurationen (z. B. mit und ohne Details), passen sich die Abbilder bei jedem Lauf an die jeweils übergebenen Optionen an. Verwende für eine Quelle-Ziel-Kombination deshalb immer dieselben Parameter.
+
+### Spiegelung entfernen
+
+Rufe die Aktion mit einem Ausdruck auf, der nichts zulässt, z. B. `include_regex: "^$a"` (passt nie). Dann werden alle Abbilder dieser Quelle im Zeitraum gelöscht. Danach die Automation deaktivieren.
+
 ### Auf Termine reagieren (Kalender-Auslöser)
 
 ```yaml

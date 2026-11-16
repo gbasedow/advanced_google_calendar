@@ -157,6 +157,44 @@
           "description": "THISANDFUTURE = dieser und alle folgenden Termine; leer = nur dieser Termin."
         }
       }
+    },
+    "sync_calendar": {
+      "name": "Kalender spiegeln (einseitig)",
+      "description": "Spiegelt die Termine eines Quellkalenders einseitig in den Zielkalender (diesen Google-Kalender). Im Ziel werden nur Termine geändert oder gelöscht, die von dieser Synchronisation angelegt wurden; geänderte Optionen werden beim nächsten Lauf auf bereits gespiegelte Termine angewendet.",
+      "fields": {
+        "source_entity_id": {
+          "name": "Quellkalender",
+          "description": "Kalender, dessen Termine gespiegelt werden. Jeder Home-Assistant-Kalender ist möglich."
+        },
+        "days_past": {
+          "name": "Tage in der Vergangenheit",
+          "description": "Wie viele Tage ab heute rückwärts synchronisiert werden."
+        },
+        "days_future": {
+          "name": "Tage in der Zukunft",
+          "description": "Wie viele Tage ab heute vorwärts synchronisiert werden."
+        },
+        "include_details": {
+          "name": "Details übernehmen",
+          "description": "Beschreibung und Ort kopieren. Wenn deaktiviert, werden nur Titel und Zeiten gespiegelt."
+        },
+        "include_all_day": {
+          "name": "Ganztägige Termine übernehmen",
+          "description": "Ganztägige Termine spiegeln."
+        },
+        "include_regex": {
+          "name": "Nur Titel passend zu",
+          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung). Nur Termine, deren Titel passt, werden gespiegelt."
+        },
+        "exclude_regex": {
+          "name": "Titel ausschließen",
+          "description": "Regulärer Ausdruck (ohne Groß-/Kleinschreibung). Termine, deren Titel passt, werden nicht gespiegelt. Hat Vorrang vor dem Einschluss-Ausdruck."
+        },
+        "dry_run": {
+          "name": "Probelauf",
+          "description": "Änderungen nur berechnen und zurückgeben, nichts schreiben."
+        }
+      }
     }
   }
 }

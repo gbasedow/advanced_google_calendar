@@ -86,3 +86,51 @@ delete_event:
           options:
             - ""
             - "THISANDFUTURE"
+
+sync_calendar:
+  target:
+    entity:
+      integration: advanced_google_calendar
+      domain: calendar
+  fields:
+    source_entity_id:
+      required: true
+      selector:
+        entity:
+          domain: calendar
+    days_past:
+      default: 7
+      selector:
+        number:
+          min: 0
+          max: 365
+          mode: box
+          unit_of_measurement: d
+    days_future:
+      default: 30
+      selector:
+        number:
+          min: 0
+          max: 730
+          mode: box
+          unit_of_measurement: d
+    include_details:
+      default: true
+      selector:
+        boolean:
+    include_all_day:
+      default: true
+      selector:
+        boolean:
+    include_regex:
+      example: "Training|Jagd"
+      selector:
+        text:
+    exclude_regex:
+      example: "^privat"
+      selector:
+        text:
+    dry_run:
+      default: false
+      selector:
+        boolean:

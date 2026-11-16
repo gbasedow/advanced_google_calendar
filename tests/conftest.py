@@ -56,6 +56,7 @@ class FakeGoogleApi:
         self.calls: list[tuple[str, str, str | None, dict[str, Any] | None]] = []
         self.fail_auth = False
         self._counter = 0
+        self.list_calls: list[dict[str, Any]] = []
 
     async def async_list_calendars(self) -> list[GoogleCalendarInfo]:
         if self.fail_auth:
@@ -63,11 +64,34 @@ class FakeGoogleApi:
         return list(self.calendars)
 
     async def async_list_events(
-        self, calendar_id, time_min, time_max=None, max_results=None
+        self,
+        calendar_id,
+        time_min,
+        time_max=None,
+        max_results=None,
+        private_extended_property=None,
     ):
         if self.fail_auth:
             raise GoogleCalendarAuthError("401")
+        self.list_calls.append(
+            {
+                "calendar_id": calendar_id,
+                "time_min": time_min,
+                "time_max": time_max,
+                "private_extended_property": private_extended_property,
+            }
+        )
         items = copy.deepcopy(self.listed.get(calendar_id, []))
+        if private_extended_property:
+            key, value = private_extended_property.split("=", 1)
+            items = [
+                item
+                for item in items
+                if ((item.get("extendedProperties") or {}).get("private") or {}).get(
+                    key
+                )
+                == value
+            ]
         return items[:max_results] if max_results else items
 
     async def async_get_event(self, calendar_id, event_id):
@@ -79,14 +103,26 @@ class FakeGoogleApi:
     async def async_insert_event(self, calendar_id, body):
         self._counter += 1
         self.calls.append(("insert", calendar_id, None, copy.deepcopy(body)))
-        return {**body, "id": f"new{self._counter}"}
+        created = {**copy.deepcopy(body), "id": f"new{self._counter}"}
+        self.listed.setdefault(calendar_id, []).append(created)
+        return copy.deepcopy(created)
 
     async def async_patch_event(self, calendar_id, event_id, body):
         self.calls.append(("patch", calendar_id, event_id, copy.deepcopy(body)))
+        for item in self.listed.get(calendar_id, []):
+            if item["id"] == event_id:
+                for key, value in copy.deepcopy(body).items():
+                    if isinstance(value, dict) and key in ("start", "end"):
+                        item[key] = {k: v for k, v in value.items() if v is not None}
+                    else:
+                        item[key] = value
         return {**body, "id": event_id}
 
     async def async_delete_event(self, calendar_id, event_id):
         self.calls.append(("delete", calendar_id, event_id, None))
+        self.listed[calendar_id] = [
+            item for item in self.listed.get(calendar_id, []) if item["id"] != event_id
+        ]
 
 
 @pytest.fixture

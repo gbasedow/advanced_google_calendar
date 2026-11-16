@@ -157,6 +157,44 @@
           "description": "THISANDFUTURE = this and all following occurrences; empty = only this occurrence."
         }
       }
+    },
+    "sync_calendar": {
+      "name": "Mirror calendar (one-way)",
+      "description": "Mirrors the events of a source calendar one-way into the target calendar (this Google calendar). Only events created by this sync are changed or deleted in the target; changed options are applied to already mirrored events on the next run.",
+      "fields": {
+        "source_entity_id": {
+          "name": "Source calendar",
+          "description": "Calendar whose events are mirrored. Any Home Assistant calendar can be used."
+        },
+        "days_past": {
+          "name": "Days in the past",
+          "description": "How many days back from today are synchronized."
+        },
+        "days_future": {
+          "name": "Days in the future",
+          "description": "How many days ahead of today are synchronized."
+        },
+        "include_details": {
+          "name": "Include details",
+          "description": "Copy description and location. If disabled, only title and times are mirrored."
+        },
+        "include_all_day": {
+          "name": "Include all-day events",
+          "description": "Mirror all-day events."
+        },
+        "include_regex": {
+          "name": "Only titles matching",
+          "description": "Regular expression (case-insensitive). Only events whose title matches are mirrored."
+        },
+        "exclude_regex": {
+          "name": "Exclude titles matching",
+          "description": "Regular expression (case-insensitive). Events whose title matches are not mirrored. Takes precedence over the include expression."
+        },
+        "dry_run": {
+          "name": "Dry run",
+          "description": "Only calculate and return the changes, do not write anything."
+        }
+      }
     }
   }
 }

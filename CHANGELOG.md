@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 – 2026-11-16
+
+- Neue Aktion `advanced_google_calendar.sync_calendar`: spiegelt einen beliebigen
+  Home-Assistant-Kalender einseitig in einen Google-Kalender dieser Integration.
+  - Parameter `days_past` / `days_future` für den Zeitraum.
+  - `include_details` (Beschreibung/Ort), `include_all_day` (ganztägige Termine),
+    `include_regex` / `exclude_regex` (Filter auf den Titel), `dry_run`.
+  - Geänderte Optionen werden beim nächsten Lauf auf bestehende Abbilder angewendet.
+  - Nur selbst angelegte Abbilder werden geändert/gelöscht; Abbilder werden nicht
+    weitergespiegelt (keine Schleifen), Abbilder ohne Erinnerungen.
+
 ## 0.1.0 – 2026-11-16
 
 Erste Version.

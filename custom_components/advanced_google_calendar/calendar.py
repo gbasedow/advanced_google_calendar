@@ -10,6 +10,7 @@ import logging
 from typing import Any
 
 from homeassistant.components.calendar import (
+    DATA_COMPONENT as CALENDAR_DATA_COMPONENT,
     EVENT_RRULE,
     CalendarEntity,
     CalendarEntityFeature,
@@ -17,6 +18,7 @@ from homeassistant.components.calendar import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -39,7 +41,10 @@ from .const import (
     ATTR_START_DATE_TIME,
     ATTR_SUMMARY,
     ATTR_UID,
+    DEFAULT_DAYS_FUTURE,
+    DEFAULT_DAYS_PAST,
     DOMAIN,
+    PROP_SOURCE,
     RANGE_THIS_AND_FUTURE,
     RRULE_PREFIX,
 )
@@ -56,6 +61,7 @@ from .convert import (
     truncate_recurrence,
 )
 from .coordinator import AdvancedGoogleCalendarConfigEntry, CalendarUpdateCoordinator
+from .sync import SyncOptions, SyncPlan, compile_regex, plan_sync
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -122,6 +128,8 @@ class AdvancedGoogleCalendarEntity(
         }
         # rrule of recurring series (id -> rrule) for expanded instances
         self._series_rrules: dict[str, str | None] = {}
+        # Prevents parallel sync runs into this calendar
+        self._sync_lock = asyncio.Lock()
 
     # ------------------------------------------------------------------ #
     # Read
@@ -169,6 +177,12 @@ class AdvancedGoogleCalendarEntity(
         self, hass: HomeAssistant, start_date: datetime, end_date: datetime
     ) -> list[CalendarEvent]:
         """Return the events in the given time range (read live from Google)."""
+        return await self._async_fetch_events(start_date, end_date)
+
+    async def _async_fetch_events(
+        self, start_date: datetime, end_date: datetime, *, skip_mirrors: bool = False
+    ) -> list[CalendarEvent]:
+        """Load and convert events; optionally without events created by a sync."""
         with self._api_errors("load events"):
             items = await self._api.async_list_events(
                 self._calendar_id, time_min=start_date, time_max=end_date
@@ -178,6 +192,10 @@ class AdvancedGoogleCalendarEntity(
         )
         events: list[CalendarEvent] = []
         for item in items:
+            if skip_mirrors and PROP_SOURCE in (
+                (item.get("extendedProperties") or {}).get("private") or {}
+            ):
+                continue
             series_rrule = self._series_rrules.get(item.get("recurringEventId", ""))
             if (
                 event := google_event_to_calendar_event(item, series_rrule)
@@ -205,6 +223,125 @@ class AdvancedGoogleCalendarEntity(
                 self._series_rrules[series_id] = extract_rrule(series.get("recurrence"))
 
         await asyncio.gather(*(_load(sid) for sid in missing))
+
+    async def async_sync_calendar_service(
+        self,
+        *,
+        source_entity_id: str,
+        days_past: int = DEFAULT_DAYS_PAST,
+        days_future: int = DEFAULT_DAYS_FUTURE,
+        include_details: bool = True,
+        include_all_day: bool = True,
+        include_regex: str | None = None,
+        exclude_regex: str | None = None,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        """Service: mirror another calendar one-way into this calendar.
+
+        Only events created by this sync relation (marked with private extended
+        properties) are changed or deleted; other events are never touched.
+        """
+        self._ensure_writable()
+        if source_entity_id == self.entity_id:
+            raise ServiceValidationError("Source and target calendar must be different")
+        source = self.hass.data[CALENDAR_DATA_COMPONENT].get_entity(source_entity_id)
+        if not isinstance(source, CalendarEntity):
+            raise ServiceValidationError(
+                f"Source calendar {source_entity_id} not found"
+            )
+        options = SyncOptions(
+            include_details=include_details,
+            include_all_day=include_all_day,
+            include_regex=compile_regex(include_regex, "include_regex"),
+            exclude_regex=compile_regex(exclude_regex, "exclude_regex"),
+        )
+        registry_entry = er.async_get(self.hass).async_get(source_entity_id)
+        source_id = registry_entry.id if registry_entry else source_entity_id
+
+        today = dt_util.start_of_local_day()
+        start = today - timedelta(days=days_past)
+        end = today + timedelta(days=days_future + 1)
+
+        async with self._sync_lock:
+            try:
+                if isinstance(source, AdvancedGoogleCalendarEntity):
+                    # Mirrors are never mirrored again (prevents A->B->A loops)
+                    source_events = await source._async_fetch_events(
+                        start, end, skip_mirrors=True
+                    )
+                else:
+                    source_events = await source.async_get_events(self.hass, start, end)
+            except HomeAssistantError:
+                raise
+            except Exception as err:
+                raise HomeAssistantError(
+                    f"Could not read events of {source_entity_id}: {err}"
+                ) from err
+            with self._api_errors("load the mirrored events"):
+                target_items = await self._api.async_list_events(
+                    self._calendar_id,
+                    time_min=start,
+                    time_max=end,
+                    private_extended_property=f"{PROP_SOURCE}={source_id}",
+                )
+            plan = plan_sync(
+                source_events, target_items, source_id, options, self._time_zone
+            )
+            result: dict[str, Any] = {
+                "created": len(plan.create),
+                "updated": len(plan.update),
+                "deleted": len(plan.delete),
+                "unchanged": plan.unchanged,
+                "errors": [],
+            }
+            if dry_run:
+                result["dry_run"] = True
+                result["to_create"] = [summary for summary, _ in plan.create]
+                result["to_update"] = [summary for summary, _, _ in plan.update]
+                result["to_delete"] = [summary for summary, _ in plan.delete]
+                return result
+
+            errors: list[str] = result["errors"]
+            await self._async_execute_sync_plan(plan, errors)
+            if errors:
+                _LOGGER.warning(
+                    "Sync %s -> %s finished with %d errors: %s",
+                    source_entity_id,
+                    self.entity_id,
+                    len(errors),
+                    errors,
+                )
+        _LOGGER.debug("Sync %s -> %s: %s", source_entity_id, self.entity_id, result)
+        if plan.create or plan.update or plan.delete:
+            await self.coordinator.async_refresh()
+        return result
+
+    async def _async_execute_sync_plan(self, plan: SyncPlan, errors: list[str]) -> None:
+        """Write the planned changes; errors of single events are collected."""
+        with self._api_errors("synchronize the calendar"):
+            for summary, body in plan.create:
+                try:
+                    await self._api.async_insert_event(self._calendar_id, body)
+                except GoogleCalendarAuthError:
+                    raise
+                except GoogleCalendarApiError as err:
+                    errors.append(f"create '{summary}': {err}")
+            for summary, event_id, body in plan.update:
+                try:
+                    await self._api.async_patch_event(self._calendar_id, event_id, body)
+                except GoogleCalendarAuthError:
+                    raise
+                except GoogleCalendarApiError as err:
+                    errors.append(f"update '{summary}': {err}")
+            for summary, event_id in plan.delete:
+                try:
+                    await self._api.async_delete_event(self._calendar_id, event_id)
+                except GoogleCalendarNotFoundError:
+                    pass  # already gone
+                except GoogleCalendarAuthError:
+                    raise
+                except GoogleCalendarApiError as err:
+                    errors.append(f"delete '{summary}': {err}")
 
     async def async_list_events_service(
         self,
