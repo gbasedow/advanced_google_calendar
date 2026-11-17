@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0 – 2026-11-17
+
+Erste stabile Version.
+
+- Eigenes Integrations-Icon (Google-Kalender-Symbol) in `brand/icon.png` und
+  `brand/icon@2x.png`. Home Assistant zeigt es ab Version 2026.3 an, z. B. unter
+  *Einstellungen → Geräte & Dienste*. Ältere Versionen zeigen weiterhin den Platzhalter.
+- Funktionsumfang wie 0.5.0: Zwei-Wege-Synchronisation mit mehreren Google-Konten,
+  Kalenderauswahl, Anlegen/Ändern/Löschen inkl. Serientermine, Aktionen
+  `list_events`, `update_event`, `delete_event` und `sync_calendar`.
+
 ## 0.5.0 – 2026-11-16
 
 - Je Konfigurationseintrag (Google-Konto) wird kein Gerät mehr angelegt. Die

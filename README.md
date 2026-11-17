@@ -14,7 +14,7 @@ Custom-Integration, die Google-Kalender als `calendar.*`-Entitäten in Home Assi
 - **Reauth**: Ist der Zugriff abgelaufen oder widerrufen, meldet HA eine erneute Anmeldung. Dabei wird geprüft, dass dasselbe Konto verwendet wird.
 - Keine zusätzlichen Python-Abhängigkeiten: Die Integration spricht direkt mit der Google Calendar API v3.
 
-Voraussetzung: Home Assistant **2025.10** oder neuer.
+Voraussetzung: Home Assistant **2025.10** oder neuer. Das Integrations-Icon wird ab Home Assistant 2026.3 angezeigt.
 
 ## Installation & Einrichtung
 
