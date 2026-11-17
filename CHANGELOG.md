@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 – 2026-11-17
+
+- `sync_calendar`: Die Filterfelder „Nur Titel passend zu“ (`include_regex`) und
+  „Titel ausschließen“ (`exclude_regex`) sind wieder optional. Die Oberfläche
+  akzeptiert die Aktion jetzt auch ohne Eintrag. Leer bzw. nicht gesetzt = Filter aus,
+  ohne Einschluss-Ausdruck werden alle Termine synchronisiert.
+- Feldbeschreibungen erklären die Vorrangregel: Sind beide Felder belegt, hat das
+  Ausschließen Vorrang vor dem Einschließen.
+
 ## 1.0.0 – 2026-11-17
 
 Erste stabile Version.

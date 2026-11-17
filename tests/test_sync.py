@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from freezegun.api import FrozenDateTimeFactory
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 import voluptuous as vol
+import yaml
 
 from custom_components.advanced_google_calendar.api import GoogleCalendarApiError
 from custom_components.advanced_google_calendar.const import DOMAIN
@@ -424,3 +426,26 @@ async def test_defaults_and_empty_filters(
     )
     start, end = source.calls[-1]
     assert (end - start).days == 7 + 30 + 1
+
+
+async def test_without_filter_fields_everything_is_mirrored(
+    hass: HomeAssistant, fake_api: FakeGoogleApi, source: FakeSource
+) -> None:
+    """Without include/exclude expressions all events are synchronized."""
+    result = await _sync(hass)
+    assert result["created"] == 2
+    assert set(_mirrors(fake_api)) == {"Training MTB", "Drückjagd"}
+
+
+def test_filter_fields_are_optional_in_ui() -> None:
+    """The UI must accept empty filter fields (not marked as required)."""
+    services = yaml.safe_load(
+        (
+            Path(__file__).parent.parent
+            / "custom_components/advanced_google_calendar/services.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    fields = services["sync_calendar"]["fields"]
+    for name in ("include_regex", "exclude_regex"):
+        assert not fields[name].get("required", False)
+        assert "default" not in fields[name]

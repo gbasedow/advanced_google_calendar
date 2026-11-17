@@ -188,11 +188,11 @@
         },
         "include_regex": {
           "name": "Only titles matching",
-          "description": "Regular expression on the event title (case-insensitive, matches anywhere in the title). Only matching events are mirrored, e.g. 'Training|Jagd'. Leave empty to mirror all events."
+          "description": "Optional. Regular expression on the event title (case-insensitive, a match anywhere in the title is enough), e.g. 'Training|Jagd'. Only matching events are mirrored. If left empty, all events are synchronized. If 'Exclude titles matching' is also set, the exclusion has priority: an event matching both expressions is not synchronized."
         },
         "exclude_regex": {
           "name": "Exclude titles matching",
-          "description": "Regular expression on the event title (case-insensitive). Matching events are not mirrored and existing copies are removed, e.g. 'privat|Arzt'. Takes precedence over 'Only titles matching'. Leave empty to exclude nothing."
+          "description": "Optional. Regular expression on the event title (case-insensitive), e.g. 'privat|Arzt'. Matching events are not mirrored and existing copies are removed. If left empty, nothing is excluded. Has priority over 'Only titles matching': an event matching both expressions is not synchronized."
         },
         "dry_run": {
           "name": "Dry run",

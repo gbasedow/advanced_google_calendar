@@ -188,11 +188,11 @@
         },
         "include_regex": {
           "name": "Nur Titel passend zu",
-          "description": "Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung, Treffer irgendwo im Titel genügt). Nur passende Termine werden gespiegelt, z. B. 'Training|Jagd'. Leer lassen, um alle Termine zu spiegeln."
+          "description": "Optional. Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung, ein Treffer irgendwo im Titel genügt), z. B. 'Training|Jagd'. Nur passende Termine werden gespiegelt. Bleibt das Feld leer, werden alle Termine synchronisiert. Ist zusätzlich „Titel ausschließen“ belegt, hat das Ausschließen Vorrang: Ein Termin, der auf beide Ausdrücke passt, wird nicht synchronisiert."
         },
         "exclude_regex": {
           "name": "Titel ausschließen",
-          "description": "Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung). Passende Termine werden nicht gespiegelt und vorhandene Kopien entfernt, z. B. 'privat|Arzt'. Hat Vorrang vor „Nur Titel passend zu“. Leer lassen, um nichts auszuschließen."
+          "description": "Optional. Regulärer Ausdruck auf den Termintitel (ohne Groß-/Kleinschreibung), z. B. 'privat|Arzt'. Passende Termine werden nicht gespiegelt, bereits vorhandene Kopien werden entfernt. Bleibt das Feld leer, wird nichts ausgeschlossen. Hat Vorrang vor „Nur Titel passend zu“: Ein Termin, der auf beide Ausdrücke passt, wird nicht synchronisiert."
         },
         "dry_run": {
           "name": "Probelauf",

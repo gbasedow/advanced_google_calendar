@@ -286,7 +286,7 @@ Mit `advanced_google_calendar.sync_calendar` überträgst du die Termine eines *
 - **Quelle** (`source_entity_id`): **jeder** Kalender in Home Assistant, also auch ein Google-Kalender eines anderen Kontos, ein lokaler Kalender, CalDAV oder ein Müllabfuhrkalender. Die Quelle wird nur gelesen.
 - **Ziel** (`target_entity_id`): ein beschreibbarer Google-Kalender dieser Integration.
 
-In der Oberfläche (*Entwicklerwerkzeuge → Aktionen* oder im Automationseditor) wählst du beide Kalender oben per Auswahlliste aus. Jedes Feld der Maske ist dort beschrieben.
+In der Oberfläche (*Entwicklerwerkzeuge → Aktionen* oder im Automationseditor) wählst du beide Kalender oben per Auswahlliste aus. Jedes Feld der Maske ist dort beschrieben. Die beiden Filterfelder sind optional und haben deshalb eine Checkbox davor. Ohne Haken ist der jeweilige Filter aus.
 
 ```yaml
 action: advanced_google_calendar.sync_calendar
@@ -297,8 +297,8 @@ data:
   days_future: 60       # Tage in die Zukunft (0–730, Standard 30)
   include_details: true # Beschreibung und Ort mitkopieren (Standard true)
   include_all_day: true # ganztägige Termine mitkopieren (Standard true)
-  include_regex: ""     # leer = kein Filter; sonst nur passende Titel
-  exclude_regex: "privat|arzt"   # leer = nichts ausschließen
+  # include_regex: "training|jagd"  # optional; weglassen/leer = alle Termine
+  exclude_regex: "privat|arzt"      # optional; weglassen/leer = nichts ausschließen
   dry_run: false        # true = nur anzeigen, nichts schreiben
 response_variable: ergebnis
 ```
@@ -308,8 +308,8 @@ response_variable: ergebnis
 | `days_past` / `days_future` | Pflichtfelder. Zeitraum ab dem heutigen Tag (ganze Tage). **Beide 0 = nur die Termine von heute.** Termine **außerhalb** des Zeitraums werden im Ziel nicht verändert, auch keine alten Abbilder. |
 | `include_details` | `false`: nur Titel und Zeiten werden übertragen, Beschreibung und Ort bleiben im Abbild leer. |
 | `include_all_day` | `false`: ganztägige Termine werden nicht gespiegelt. |
-| `include_regex` | Leer = Filter aus. Sonst regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
-| `exclude_regex` | Leer = Filter aus. Sonst regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. Hat Vorrang vor `include_regex`. |
+| `include_regex` | Optional. **Leer bzw. nicht gesetzt = alle Termine werden synchronisiert.** Sonst regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
+| `exclude_regex` | Optional. Leer bzw. nicht gesetzt = nichts wird ausgeschlossen. Sonst regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. **Sind beide Felder belegt, hat das Ausschließen Vorrang:** Ein Termin, der auf beide Ausdrücke passt, wird nicht synchronisiert. |
 | `dry_run` | `true`: nichts schreiben, nur zurückgeben, was angelegt, geändert und gelöscht würde (Listen `to_create`, `to_update`, `to_delete`). Ideal zum Testen der regulären Ausdrücke. |
 
 **Verhalten**
