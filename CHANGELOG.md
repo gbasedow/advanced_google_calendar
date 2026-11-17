@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 – 2026-11-17
+
+- `sync_calendar`: Beschreibung und Ort sind getrennt wählbar
+  (`include_description`, `include_location`, je Standard an). Ist eine Option aus,
+  wird der Wert in den Kopien im Zielkalender gelöscht, auch bei bereits gespiegelten
+  Terminen.
+- Das bisherige Feld `include_details` wird für ältere Automationen weiter unterstützt
+  (setzt beide Optionen). Ein ausdrücklich angegebenes neues Feld hat Vorrang.
+- Ausführliche Feldbeschreibungen (Deutsch/Englisch) für die neuen Optionen.
+
 ## 1.1.0 – 2026-11-17
 
 - `sync_calendar`: Die Filterfelder „Nur Titel passend zu“ (`include_regex`) und

@@ -29,7 +29,9 @@ from .const import (
     ATTR_END_DATE_TIME,
     ATTR_EXCLUDE_REGEX,
     ATTR_INCLUDE_ALL_DAY,
+    ATTR_INCLUDE_DESCRIPTION,
     ATTR_INCLUDE_DETAILS,
+    ATTR_INCLUDE_LOCATION,
     ATTR_INCLUDE_REGEX,
     ATTR_LOCATION,
     ATTR_RECURRENCE_ID,
@@ -91,7 +93,10 @@ SYNC_CALENDAR_SCHEMA = vol.Schema(
         vol.Required(ATTR_DAYS_FUTURE, default=DEFAULT_DAYS_FUTURE): vol.All(
             vol.Coerce(int), vol.Range(min=0, max=MAX_DAYS_FUTURE)
         ),
-        vol.Optional(ATTR_INCLUDE_DETAILS, default=True): cv.boolean,
+        vol.Optional(ATTR_INCLUDE_DESCRIPTION): cv.boolean,
+        vol.Optional(ATTR_INCLUDE_LOCATION): cv.boolean,
+        # Deprecated (before 1.2.0): sets description and location together
+        vol.Optional(ATTR_INCLUDE_DETAILS): cv.boolean,
         vol.Optional(ATTR_INCLUDE_ALL_DAY, default=True): cv.boolean,
         # Empty expression = filter not active
         vol.Optional(ATTR_INCLUDE_REGEX, default=""): vol.Any(None, cv.string),
@@ -105,6 +110,10 @@ async def _async_sync_calendar(call: ServiceCall) -> ServiceResponse:
     """Mirror the source calendar one-way into the target calendar."""
     data = dict(call.data)
     target_entity_id: str = data.pop(ATTR_TARGET_ENTITY_ID)
+    # include_details (old automations) applies to every field not given explicitly
+    details: bool = data.pop(ATTR_INCLUDE_DETAILS, True)
+    data.setdefault(ATTR_INCLUDE_DESCRIPTION, details)
+    data.setdefault(ATTR_INCLUDE_LOCATION, details)
     target = call.hass.data[CALENDAR_DATA_COMPONENT].get_entity(target_entity_id)
     if (
         target is None

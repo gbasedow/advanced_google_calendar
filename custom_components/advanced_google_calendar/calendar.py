@@ -224,7 +224,8 @@ class AdvancedGoogleCalendarEntity(
         source_entity_id: str,
         days_past: int = DEFAULT_DAYS_PAST,
         days_future: int = DEFAULT_DAYS_FUTURE,
-        include_details: bool = True,
+        include_description: bool = True,
+        include_location: bool = True,
         include_all_day: bool = True,
         include_regex: str | None = None,
         exclude_regex: str | None = None,
@@ -244,7 +245,8 @@ class AdvancedGoogleCalendarEntity(
                 f"Source calendar {source_entity_id} not found"
             )
         options = SyncOptions(
-            include_details=include_details,
+            include_description=include_description,
+            include_location=include_location,
             include_all_day=include_all_day,
             include_regex=compile_regex(include_regex, "include_regex"),
             exclude_regex=compile_regex(exclude_regex, "exclude_regex"),

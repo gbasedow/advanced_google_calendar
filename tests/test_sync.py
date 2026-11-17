@@ -449,3 +449,55 @@ def test_filter_fields_are_optional_in_ui() -> None:
     for name in ("include_regex", "exclude_regex"):
         assert not fields[name].get("required", False)
         assert "default" not in fields[name]
+
+
+async def test_description_and_location_separately(
+    hass: HomeAssistant, fake_api: FakeGoogleApi, source: FakeSource
+) -> None:
+    """Description and location can be switched off independently.
+
+    A disabled field is deleted in the target, also for existing mirrors.
+    """
+    await _sync(hass)
+    assert _mirrors(fake_api)["Training MTB"]["description"] == "Trails"
+    assert _mirrors(fake_api)["Training MTB"]["location"] == "Wald"
+
+    # Description off: deleted in the target, location stays
+    fake_api.calls.clear()
+    result = await _sync(hass, include_description=False)
+    assert result["updated"] == 2
+    patch_bodies = [call[3] for call in fake_api.calls if call[0] == "patch"]
+    assert all(body["description"] == "" for body in patch_bodies)
+    mirror = _mirrors(fake_api)["Training MTB"]
+    assert (mirror["description"], mirror["location"]) == ("", "Wald")
+
+    # Location off as well, description back on
+    result = await _sync(hass, include_description=True, include_location=False)
+    assert result["updated"] == 2
+    mirror = _mirrors(fake_api)["Drückjagd"]
+    assert (mirror["description"], mirror["location"]) == ("Revier Nord", "")
+
+    # Both on again: everything restored
+    result = await _sync(hass)
+    assert result["updated"] == 2
+    mirror = _mirrors(fake_api)["Drückjagd"]
+    assert (mirror["description"], mirror["location"]) == ("Revier Nord", "Hochsitz 3")
+
+
+async def test_old_include_details_still_supported(
+    hass: HomeAssistant, fake_api: FakeGoogleApi, source: FakeSource
+) -> None:
+    """include_details from older automations still works, new fields win."""
+    await _sync(hass, include_details=True)
+    # Same content with the new defaults: nothing to update
+    result = await _sync(hass)
+    assert result["unchanged"] == 2
+
+    await _sync(hass, include_details=False)
+    mirror = _mirrors(fake_api)["Drückjagd"]
+    assert (mirror["description"], mirror["location"]) == ("", "")
+
+    # Explicit new field overrides the old one for that field
+    await _sync(hass, include_details=False, include_location=True)
+    mirror = _mirrors(fake_api)["Drückjagd"]
+    assert (mirror["description"], mirror["location"]) == ("", "Hochsitz 3")

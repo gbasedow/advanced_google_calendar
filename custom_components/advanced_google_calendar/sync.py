@@ -20,7 +20,8 @@ from .convert import build_google_body
 class SyncOptions:
     """Options controlling what is mirrored."""
 
-    include_details: bool = True
+    include_description: bool = True
+    include_location: bool = True
     include_all_day: bool = True
     include_regex: re.Pattern[str] | None = None
     exclude_regex: re.Pattern[str] | None = None
@@ -97,8 +98,10 @@ def _project(event: CalendarEvent, options: SyncOptions) -> dict[str, Any]:
     """Return the Home Assistant style data of the mirror."""
     return {
         "summary": event.summary or "",
-        "description": (event.description or "") if options.include_details else "",
-        "location": (event.location or "") if options.include_details else "",
+        # A disabled field is written as empty string, so the value is also
+        # removed from mirrors that were created with the field enabled.
+        "description": (event.description or "") if options.include_description else "",
+        "location": (event.location or "") if options.include_location else "",
         "dtstart": event.start,
         "dtend": event.end,
     }

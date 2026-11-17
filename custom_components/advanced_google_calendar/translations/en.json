@@ -178,9 +178,13 @@
           "name": "Days in the future",
           "description": "Number of days after today that are synchronized (0 = end today). Events further in the future are mirrored on a later run as soon as they move into the period."
         },
-        "include_details": {
-          "name": "Copy description and location",
-          "description": "On: description and location are copied. Off: only title and times are copied, description and location of the copies are emptied – also for events mirrored earlier."
+        "include_description": {
+          "name": "Copy description",
+          "description": "On: the description of the source event is copied into the target calendar. Off: the description is not copied and is deleted from the copies in the target calendar – also from events mirrored earlier (on the next run)."
+        },
+        "include_location": {
+          "name": "Copy location",
+          "description": "On: the location of the source event is copied into the target calendar. Off: the location is not copied and is deleted from the copies in the target calendar – also from events mirrored earlier (on the next run)."
         },
         "include_all_day": {
           "name": "Copy all-day events",

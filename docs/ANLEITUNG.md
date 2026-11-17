@@ -295,7 +295,8 @@ data:
   target_entity_id: calendar.familie    # Ziel (Abbild)
   days_past: 7          # Tage in die Vergangenheit (0–365, Standard 7)
   days_future: 60       # Tage in die Zukunft (0–730, Standard 30)
-  include_details: true # Beschreibung und Ort mitkopieren (Standard true)
+  include_description: true # Beschreibung mitkopieren (Standard true)
+  include_location: true    # Ort mitkopieren (Standard true)
   include_all_day: true # ganztägige Termine mitkopieren (Standard true)
   # include_regex: "training|jagd"  # optional; weglassen/leer = alle Termine
   exclude_regex: "privat|arzt"      # optional; weglassen/leer = nichts ausschließen
@@ -306,7 +307,9 @@ response_variable: ergebnis
 | Parameter | Bedeutung |
 |---|---|
 | `days_past` / `days_future` | Pflichtfelder. Zeitraum ab dem heutigen Tag (ganze Tage). **Beide 0 = nur die Termine von heute.** Termine **außerhalb** des Zeitraums werden im Ziel nicht verändert, auch keine alten Abbilder. |
-| `include_details` | `false`: nur Titel und Zeiten werden übertragen, Beschreibung und Ort bleiben im Abbild leer. |
+| `include_description` | `false`: Die Beschreibung wird nicht übernommen und in den Kopien im Zielkalender **gelöscht**, auch bei bereits gespiegelten Terminen. |
+| `include_location` | `false`: Der Ort wird nicht übernommen und in den Kopien im Zielkalender **gelöscht**, auch bei bereits gespiegelten Terminen. |
+| `include_details` | Veraltet, nur noch für ältere Automationen: setzt `include_description` und `include_location` gemeinsam. Ein ausdrücklich angegebenes neues Feld hat Vorrang. |
 | `include_all_day` | `false`: ganztägige Termine werden nicht gespiegelt. |
 | `include_regex` | Optional. **Leer bzw. nicht gesetzt = alle Termine werden synchronisiert.** Sonst regulärer Ausdruck auf den **Titel**. Nur passende Termine werden gespiegelt. Groß-/Kleinschreibung spielt keine Rolle, der Ausdruck muss nur irgendwo im Titel vorkommen (`training` passt auf „MTB-Training“). Für einen exakten Titel: `^Training$`. |
 | `exclude_regex` | Optional. Leer bzw. nicht gesetzt = nichts wird ausgeschlossen. Sonst regulärer Ausdruck auf den Titel. Passende Termine werden **nicht** gespiegelt. **Sind beide Felder belegt, hat das Ausschließen Vorrang:** Ein Termin, der auf beide Ausdrücke passt, wird nicht synchronisiert. |
@@ -314,7 +317,7 @@ response_variable: ergebnis
 
 **Verhalten**
 - Neue Termine der Quelle werden angelegt, geänderte aktualisiert, gelöschte (oder nicht mehr passende) im Ziel gelöscht.
-- **Geänderte Optionen wirken auf bereits gespiegelte Termine.** Schaltest du z. B. `include_details` aus, werden beim nächsten Lauf Beschreibung und Ort aus allen vorhandenen Abbildern entfernt. Bei `include_all_day: false` oder einem geänderten Ausdruck werden nicht mehr passende Abbilder gelöscht und neu passende angelegt.
+- **Geänderte Optionen wirken auf bereits gespiegelte Termine.** Schaltest du z. B. `include_description` aus, wird beim nächsten Lauf die Beschreibung aus allen vorhandenen Abbildern entfernt, der Ort bleibt erhalten (und umgekehrt mit `include_location`). Bei `include_all_day: false` oder einem geänderten Ausdruck werden nicht mehr passende Abbilder gelöscht und neu passende angelegt.
 - Im Zielkalender werden **nur Termine angefasst, die diese Synchronisation selbst angelegt hat**. Dafür trägt jedes Abbild eine unsichtbare Markierung. Deine eigenen Termine im Zielkalender bleiben unberührt. Mehrere Quellen können in denselben Zielkalender gespiegelt werden.
 - Serientermine werden als einzelne Termine gespiegelt.
 - Abbilder haben keine Erinnerungen. So bekommst du keine doppelten Benachrichtigungen.
@@ -337,7 +340,8 @@ actions:
       target_entity_id: calendar.familie
       days_past: 1
       days_future: 60
-      include_details: false
+      include_description: false
+      include_location: true
       exclude_regex: "privat"
 ```
 

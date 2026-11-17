@@ -178,9 +178,13 @@
           "name": "Tage in der Zukunft",
           "description": "Anzahl Tage nach heute, die synchronisiert werden (0 = bis heute). Termine, die weiter in der Zukunft liegen, werden bei einem späteren Lauf gespiegelt, sobald sie in den Zeitraum rücken."
         },
-        "include_details": {
-          "name": "Beschreibung und Ort übernehmen",
-          "description": "An: Beschreibung und Ort werden mitkopiert. Aus: Es werden nur Titel und Zeiten kopiert; Beschreibung und Ort der Kopien werden geleert – auch bei bereits gespiegelten Terminen."
+        "include_description": {
+          "name": "Beschreibung übernehmen",
+          "description": "An: Die Beschreibung des Quelltermins wird in den Zielkalender kopiert. Aus: Die Beschreibung wird nicht übernommen und in den Kopien im Zielkalender gelöscht – auch bei bereits gespiegelten Terminen (beim nächsten Lauf)."
+        },
+        "include_location": {
+          "name": "Ort übernehmen",
+          "description": "An: Der Ort des Quelltermins wird in den Zielkalender kopiert. Aus: Der Ort wird nicht übernommen und in den Kopien im Zielkalender gelöscht – auch bei bereits gespiegelten Terminen (beim nächsten Lauf)."
         },
         "include_all_day": {
           "name": "Ganztägige Termine übernehmen",

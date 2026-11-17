@@ -118,7 +118,11 @@ sync_calendar:
           max: 730
           mode: box
           unit_of_measurement: d
-    include_details:
+    include_description:
+      default: true
+      selector:
+        boolean:
+    include_location:
       default: true
       selector:
         boolean:

@@ -34,7 +34,7 @@ Kurzfassung:
 | `advanced_google_calendar.list_events` | Termine inkl. `uid`, `recurrence_id`, `rrule` abrufen (mit Rückgabewert) |
 | `advanced_google_calendar.update_event` | Termin ändern; nur die angegebenen Felder werden geändert |
 | `advanced_google_calendar.delete_event` | Termin, einzelnen Serientermin oder „diesen und folgende“ löschen |
-| `advanced_google_calendar.sync_calendar` | Einen beliebigen Kalender einseitig in einen Google-Kalender spiegeln (Zeitraum in Tagen, Details ja/nein, Ganztägige ja/nein, Regex-Filter auf den Titel, Probelauf) |
+| `advanced_google_calendar.sync_calendar` | Einen beliebigen Kalender einseitig in einen Google-Kalender spiegeln (Zeitraum in Tagen, Beschreibung und Ort einzeln ja/nein, Ganztägige ja/nein, Regex-Filter auf den Titel, Probelauf) |
 
 Beispiele findest du in der [Anleitung](docs/ANLEITUNG.md#7-nutzung-in-dashboard-und-automationen).
 
