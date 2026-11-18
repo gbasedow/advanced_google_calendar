@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 – 2026-11-18
+
+- Neues, eigenes Integrations-Icon: Kalenderblatt mit Ringbindung und Tagesraster
+  sowie ein Sync-Symbol für die Synchronisation, im Farbschema des bisherigen Logos.
+  Home Assistant zeigt es ab Version 2026.3 an.
+
 ## 1.2.0 – 2026-11-17
 
 - `sync_calendar`: Beschreibung und Ort sind getrennt wählbar
